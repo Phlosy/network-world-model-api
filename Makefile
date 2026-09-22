@@ -31,7 +31,7 @@ clean-python:
 
 .PHONY: generate-python
 generate-python: clean-python
-	$(DATAMODEL_CODEGEN) --input $(OPENAPI_SPEC) --output python/network_world_model_api/models.py --output-model-type pydantic_v2.BaseModel
+	$(DATAMODEL_CODEGEN) --input $(OPENAPI_SPEC) --output python/network_world_model_api/models.py --output-model-type pydantic_v2.BaseModel --disable-timestamp
 
 .PHONY: generate
 generate: generate-go generate-python

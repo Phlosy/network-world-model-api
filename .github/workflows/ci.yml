@@ -82,8 +82,10 @@ jobs:
       - name: Install Codegen Tools
         run: |
           go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.7.2
-          python -m pip install datamodel-code-generator
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          python -m pip install --upgrade pip
+          pip install datamodel-code-generator pytest
 
       - name: Run make verify
         run: |
-          make verify OAPI_CODEGEN=$(which oapi-codegen) DATAMODEL_CODEGEN=$(which datamodel-codegen)
+          make verify PYTEST=pytest
