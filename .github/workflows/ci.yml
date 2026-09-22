@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-contract:
+    name: Lint OpenAPI Contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Lint OpenAPI Contract
+        run: npx --yes --package @redocly/cli@1.25.15 -- redocly lint contracts/openapi/network-world-state.openapi.json
+
+  test-go:
+    name: Test Go SDK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: go/go.sum
+
+      - name: Test and Vet Go
+        run: |
+          cd go
+          go test -v ./...
+          go vet ./...
+
+  test-python:
+    name: Test Python SDK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "pydantic>=2.6" pytest
+
+      - name: Run Pytest
+        run: |
+          PYTHONPATH=python pytest python/tests
+
+  verify-codegen:
+    name: Verify Codegen In-Sync (Anti-Drift)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Codegen Tools
+        run: |
+          go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.7.2
+          python -m pip install datamodel-code-generator
+
+      - name: Run make verify
+        run: |
+          make verify OAPI_CODEGEN=$(which oapi-codegen) DATAMODEL_CODEGEN=$(which datamodel-codegen)

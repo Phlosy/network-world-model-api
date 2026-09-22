@@ -1,0 +1,13 @@
+{
+  "name": "@phlosy/network-world-model-api",
+  "version": "0.1.0",
+  "description": "Network World State OpenAPI specifications and multi-language code generation",
+  "private": true,
+  "scripts": {
+    "lint": "redocly lint contracts/openapi/network-world-state.openapi.json",
+    "normalize": "node tools/normalize-openapi.mjs"
+  },
+  "devDependencies": {
+    "@redocly/cli": "1.25.15"
+  }
+}

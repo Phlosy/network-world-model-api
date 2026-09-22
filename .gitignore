@@ -1,0 +1,23 @@
+# Node
+node_modules/
+package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.venv/
+env/
+venv/
+
+# Go
+bin/
+*.exe
+
+# OS
+.DS_Store
+Thumbs.db

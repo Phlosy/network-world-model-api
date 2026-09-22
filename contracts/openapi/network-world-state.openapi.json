@@ -1,0 +1,3276 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Network World State Schema",
+    "version": "0.1.0",
+    "description": "network-world-model 的协议无关世界状态数据契约。用于将外部仿真系统采集的数据统一映射为标准 Network World State，支持后续时序对齐、Transition/Sequence Dataset 构建、World Model 训练、预测与 Rollout。"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "ScenarioTime": {
+        "type": "object",
+        "description": "场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。",
+        "properties": {
+          "value": {
+            "type": "number",
+            "minimum": 0,
+            "description": "自场景起点开始累计的时间值。"
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "s"
+            ],
+            "description": "场景时间统一以秒表示。"
+          }
+        },
+        "required": [
+          "value",
+          "unit"
+        ],
+        "additionalProperties": false,
+        "example": {
+          "value": 125.32,
+          "unit": "s"
+        }
+      },
+      "SchemaMetadata": {
+        "type": "object",
+        "description": "标识当前 Network World State 数据契约的名称和版本。",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "network-world-state"
+            ],
+            "description": "Schema 固定名称。"
+          },
+          "version": {
+            "type": "string",
+            "description": "Schema 版本。第一阶段建议使用语义化或显式版本号，例如 0.1。"
+          }
+        },
+        "required": [
+          "name",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "Position": {
+        "type": "object",
+        "description": "节点在当前 scenario_time 下的位置状态。位置属于 Node State，而不是 Physical World。",
+        "properties": {
+          "frame": {
+            "type": "string",
+            "description": "坐标参考系，例如 ECEF、ECI、WGS84 或项目自定义参考系。",
+            "example": "ECEF"
+          },
+          "x": {
+            "type": "object",
+            "description": "X 轴坐标。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false,
+            "example": {
+              "value": 6371000,
+              "unit": "m"
+            }
+          },
+          "y": {
+            "type": "object",
+            "description": "Y 轴坐标。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "z": {
+            "type": "object",
+            "description": "Z 轴坐标。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "frame",
+          "x",
+          "y",
+          "z"
+        ],
+        "additionalProperties": false
+      },
+      "Velocity": {
+        "type": "object",
+        "description": "节点在当前 scenario_time 下相对于 position.frame 的速度。",
+        "properties": {
+          "vx": {
+            "type": "object",
+            "description": "X 轴速度。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "vy": {
+            "type": "object",
+            "description": "Y 轴速度。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "vz": {
+            "type": "object",
+            "description": "Z 轴速度。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "vx",
+          "vy",
+          "vz"
+        ],
+        "additionalProperties": false
+      },
+      "Orientation": {
+        "type": "object",
+        "nullable": true,
+        "description": "节点姿态。对需要指向、波束、平台姿态等场景有意义。",
+        "properties": {
+          "roll": {
+            "type": "object",
+            "nullable": true,
+            "description": "横滚角。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "pitch": {
+            "type": "object",
+            "nullable": true,
+            "description": "俯仰角。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "yaw": {
+            "type": "object",
+            "nullable": true,
+            "description": "偏航角。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "PhysicalWorld": {
+        "type": "object",
+        "description": "节点之外客观存在的物理环境。用于描述空间、地理、大气、电磁、干扰及传播环境。节点的位置、速度、姿态等属于 Node State。",
+        "properties": {
+          "environment_type": {
+            "type": "string",
+            "enum": [
+              "SPACE",
+              "TERRESTRIAL",
+              "AIR",
+              "SEA",
+              "MIXED",
+              "GENERIC"
+            ],
+            "description": "场景的宏观物理环境分类，仅用于描述和筛选，不决定核心计算逻辑。"
+          },
+          "spatial_environment": {
+            "type": "object",
+            "description": "空间/地理参考环境。",
+            "properties": {
+              "default_reference_frame": {
+                "type": "string",
+                "description": "场景默认坐标参考系；节点可覆盖并显式声明自己的 frame。",
+                "example": "ECEF"
+              },
+              "earth_model": {
+                "type": "string",
+                "nullable": true,
+                "description": "地球模型或参考椭球，例如 WGS84。"
+              },
+              "terrain_model_id": {
+                "type": "string",
+                "nullable": true,
+                "description": "外部地形模型标识。"
+              },
+              "obstacle_model_id": {
+                "type": "string",
+                "nullable": true,
+                "description": "外部障碍物模型标识。"
+              }
+            },
+            "required": [
+              "default_reference_frame"
+            ],
+            "additionalProperties": false
+          },
+          "atmosphere": {
+            "type": "object",
+            "nullable": true,
+            "description": "大气环境条件。可由仿真系统直接采集并映射。",
+            "properties": {
+              "temperature": {
+                "type": "object",
+                "nullable": true,
+                "description": "环境温度。",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "pressure": {
+                "type": "object",
+                "nullable": true,
+                "description": "环境气压。",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "humidity": {
+                "type": "number",
+                "nullable": true,
+                "minimum": 0,
+                "maximum": 1,
+                "description": "相对湿度，建议使用 0~1。"
+              },
+              "rain_rate": {
+                "type": "object",
+                "nullable": true,
+                "description": "降雨率。",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "cloud_attenuation": {
+                "type": "object",
+                "nullable": true,
+                "description": "云衰减。",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "electromagnetic_environment": {
+            "type": "object",
+            "nullable": true,
+            "description": "电磁背景、噪声和干扰环境。",
+            "properties": {
+              "background_noise": {
+                "type": "object",
+                "nullable": true,
+                "description": "背景噪声功率。",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "interference_regions": {
+                "type": "array",
+                "description": "场景中的干扰区域或干扰源集合。",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "interference_id": {
+                      "type": "string",
+                      "description": "干扰对象唯一标识。"
+                    },
+                    "description": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "干扰源的人类可读说明。"
+                    },
+                    "parameters": {
+                      "type": "object",
+                      "description": "由数据源提供的干扰参数。Schema 对其保持开放。",
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": [
+                    "interference_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "extensions": {
+            "type": "object",
+            "description": "物理世界的扩展属性。扩展字段不应改变核心 Schema 语义。",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "environment_type",
+          "spatial_environment"
+        ],
+        "additionalProperties": false
+      },
+      "ComputeCapability": {
+        "type": "object",
+        "description": "节点的静态或慢变化计算能力。",
+        "properties": {
+          "cpu_architecture": {
+            "type": "string",
+            "nullable": true,
+            "description": "CPU 架构，例如 x86_64、aarch64。"
+          },
+          "cpu_cores": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "description": "CPU 逻辑/物理核心数，具体口径由数据源约定。"
+          },
+          "cpu_compute_capacity": {
+            "type": "object",
+            "nullable": true,
+            "description": "CPU 理论计算能力。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "gpu_count": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "description": "GPU 数量。"
+          },
+          "gpu_model": {
+            "type": "string",
+            "nullable": true,
+            "description": "GPU 型号。"
+          },
+          "gpu_compute_capacity": {
+            "type": "object",
+            "nullable": true,
+            "description": "GPU 理论计算能力。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "memory_capacity": {
+            "type": "object",
+            "nullable": true,
+            "description": "内存总容量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "PayloadCapability": {
+        "type": "object",
+        "description": "节点搭载的任务载荷或功能载荷，例如雷达、相机、传感器或专用处理载荷。",
+        "properties": {
+          "payload_id": {
+            "type": "string",
+            "description": "载荷在节点内的唯一标识。"
+          },
+          "payload_type": {
+            "type": "string",
+            "description": "载荷类型。该字段保持开放，便于适配不同仿真系统。"
+          },
+          "capabilities": {
+            "type": "object",
+            "description": "载荷特有能力参数。",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "payload_id",
+          "payload_type"
+        ],
+        "additionalProperties": false
+      },
+      "CommunicationTerminalCapability": {
+        "type": "object",
+        "description": "节点通信终端的能力描述。Laser、RF、Microwave、Ethernet、Optical 等统一使用该抽象。终端能力描述“能做什么”，当前工作状态放在 CommunicationTerminalState。",
+        "properties": {
+          "terminal_id": {
+            "type": "string",
+            "description": "通信终端在所属节点内的唯一标识。"
+          },
+          "terminal_type": {
+            "type": "string",
+            "enum": [
+              "LASER",
+              "RF",
+              "MICROWAVE",
+              "ETHERNET",
+              "OPTICAL",
+              "RADIO",
+              "GENERIC"
+            ],
+            "description": "通信终端类型。"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "该能力对象是否在本场景中启用。"
+          },
+          "duplex": {
+            "type": "string",
+            "enum": [
+              "HALF",
+              "FULL",
+              "UNKNOWN"
+            ],
+            "description": "双工模式。"
+          },
+          "max_data_rate": {
+            "type": "object",
+            "description": "终端理论最大数据速率。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "max_range": {
+            "type": "object",
+            "nullable": true,
+            "description": "终端理论最大通信距离。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "supported_frequencies": {
+            "type": "array",
+            "description": "支持的中心频率或离散频点列表；需要频段时可结合 supported_bands。",
+            "items": {
+              "type": "number"
+            }
+          },
+          "supported_bands": {
+            "type": "array",
+            "description": "支持的频段名称或项目内部频段标识。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pointing_required": {
+            "type": "boolean",
+            "description": "是否要求定向指向或跟踪，例如激光终端通常为 true。"
+          },
+          "field_of_view": {
+            "type": "object",
+            "nullable": true,
+            "description": "终端视场角。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "max_tracking_rate": {
+            "type": "object",
+            "nullable": true,
+            "description": "最大跟踪角速度。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "antenna_type": {
+            "type": "string",
+            "nullable": true,
+            "description": "天线/光学口径等终端辐射/接收结构类型。"
+          },
+          "antenna_gain": {
+            "type": "object",
+            "nullable": true,
+            "description": "天线增益。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "max_transmit_power": {
+            "type": "object",
+            "nullable": true,
+            "description": "最大发射功率。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "extensions": {
+            "type": "object",
+            "description": "终端类型特有的扩展能力参数。",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "terminal_id",
+          "terminal_type",
+          "enabled",
+          "max_data_rate"
+        ],
+        "additionalProperties": false
+      },
+      "NodeCapabilities": {
+        "type": "object",
+        "description": "节点作为独立硬件个体所具备的静态/慢变化能力集合。",
+        "properties": {
+          "compute": {
+            "$ref": "#/components/schemas/ComputeCapability"
+          },
+          "storage_capacity": {
+            "type": "object",
+            "nullable": true,
+            "description": "节点本地存储总容量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "payloads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayloadCapability"
+            }
+          },
+          "communication_terminals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommunicationTerminalCapability"
+            }
+          },
+          "extensions": {
+            "type": "object",
+            "description": "节点特有能力扩展。",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "communication_terminals"
+        ],
+        "additionalProperties": false
+      },
+      "CommunicationTerminalState": {
+        "type": "object",
+        "description": "通信终端在当前 scenario_time 下的动态运行状态。",
+        "properties": {
+          "terminal_id": {
+            "type": "string",
+            "description": "引用所属节点 capabilities.communication_terminals 中的 terminal_id。"
+          },
+          "operational": {
+            "type": "boolean",
+            "description": "终端是否处于可工作状态。"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "终端当前是否处于激活/工作状态。"
+          },
+          "tx_rate": {
+            "type": "object",
+            "description": "当前发送速率。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "rx_rate": {
+            "type": "object",
+            "description": "当前接收速率。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "pointing_direction": {
+            "type": "object",
+            "nullable": true,
+            "description": "当前指向信息；具体坐标表达由数据源决定。",
+            "additionalProperties": true
+          },
+          "current_frequency": {
+            "type": "object",
+            "nullable": true,
+            "description": "当前工作频率。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "current_power": {
+            "type": "object",
+            "nullable": true,
+            "description": "当前发射功率。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "terminal_id",
+          "operational",
+          "active",
+          "tx_rate",
+          "rx_rate"
+        ],
+        "additionalProperties": false
+      },
+      "NodeState": {
+        "type": "object",
+        "description": "节点在当前 scenario_time 下的动态状态。",
+        "properties": {
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "velocity": {
+            "$ref": "#/components/schemas/Velocity"
+          },
+          "orientation": {
+            "$ref": "#/components/schemas/Orientation"
+          },
+          "operational": {
+            "type": "boolean",
+            "description": "节点整体是否处于工作状态。"
+          },
+          "health_score": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "可选健康度，0 表示完全不可用，1 表示完全健康。"
+          },
+          "faults": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "当前生效的故障/异常标识。"
+          },
+          "cpu_utilization": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "CPU 利用率，统一使用 0~1。"
+          },
+          "gpu_utilization": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "GPU 利用率，统一使用 0~1。"
+          },
+          "memory_utilization": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "内存利用率，统一使用 0~1。"
+          },
+          "communication_terminals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommunicationTerminalState"
+            }
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "节点动态状态扩展。"
+          }
+        },
+        "required": [
+          "position",
+          "velocity",
+          "operational",
+          "communication_terminals"
+        ],
+        "additionalProperties": false
+      },
+      "Node": {
+        "type": "object",
+        "description": "网络世界中的独立物理设备或平台。卫星、地面站、飞机、无人机、车辆、舰船、服务器等统一建模为 Node。",
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "description": "在 world_id 范围内全局唯一的节点 ID。"
+          },
+          "node_type": {
+            "type": "string",
+            "enum": [
+              "SATELLITE",
+              "GROUND_STATION",
+              "AIRCRAFT",
+              "UAV",
+              "VEHICLE",
+              "SHIP",
+              "SERVER",
+              "ROUTER",
+              "SWITCH",
+              "TERMINAL",
+              "GENERIC"
+            ],
+            "description": "节点类型。该枚举用于分类，不应驱动核心模型中的场景特化逻辑。"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "可读名称。"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "节点是否属于当前场景。"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/NodeCapabilities"
+          },
+          "state": {
+            "$ref": "#/components/schemas/NodeState"
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "节点级扩展字段。"
+          }
+        },
+        "required": [
+          "node_id",
+          "node_type",
+          "enabled",
+          "capabilities",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "L2Endpoint": {
+        "type": "object",
+        "description": "L2 Link 的端点。必须同时指向 Node 和该 Node 上的通信终端。",
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "description": "引用 nodes[].node_id。"
+          },
+          "terminal_id": {
+            "type": "string",
+            "description": "引用对应节点的 communication terminal。"
+          }
+        },
+        "required": [
+          "node_id",
+          "terminal_id"
+        ],
+        "additionalProperties": false
+      },
+      "QueueState": {
+        "type": "object",
+        "nullable": true,
+        "description": "链路或接口上的队列状态。第一阶段可只采集可获得的聚合队列指标。",
+        "properties": {
+          "queue_depth": {
+            "type": "object",
+            "nullable": true,
+            "description": "当前排队数据量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "queue_capacity": {
+            "type": "object",
+            "nullable": true,
+            "description": "队列容量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "utilization": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "队列利用率，0~1。"
+          }
+        },
+        "additionalProperties": false
+      },
+      "L2Link": {
+        "type": "object",
+        "description": "两个通信终端之间当前存在的二层/通信层连接状态。星间、星地、地面、空地等统一建模。",
+        "properties": {
+          "link_id": {
+            "type": "string",
+            "description": "L2 Link 全局唯一标识。"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "该 Link 是否属于当前场景配置。"
+          },
+          "endpoint_a": {
+            "$ref": "#/components/schemas/L2Endpoint"
+          },
+          "endpoint_b": {
+            "$ref": "#/components/schemas/L2Endpoint"
+          },
+          "link_class": {
+            "type": "string",
+            "enum": [
+              "ISL",
+              "SPACE_GROUND",
+              "TERRESTRIAL",
+              "AIR_GROUND",
+              "AIR_AIR",
+              "SEA_GROUND",
+              "GENERIC"
+            ],
+            "description": "场景语义上的链路分类。"
+          },
+          "medium": {
+            "type": "string",
+            "enum": [
+              "RF",
+              "LASER",
+              "MICROWAVE",
+              "ETHERNET",
+              "FIBER",
+              "OPTICAL",
+              "GENERIC"
+            ],
+            "description": "实际通信媒介。"
+          },
+          "max_capacity": {
+            "type": "object",
+            "description": "链路静态/理论最大容量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "operational": {
+            "type": "boolean",
+            "description": "链路当前是否可工作。"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "UP",
+              "DOWN",
+              "DEGRADED",
+              "UNKNOWN"
+            ],
+            "description": "链路当前运行状态。"
+          },
+          "capacity": {
+            "type": "object",
+            "description": "当前有效容量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "available_bandwidth": {
+            "type": "object",
+            "description": "当前可用带宽。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "utilization": {
+            "type": "number",
+            "minimum": 0,
+            "description": "当前利用率。通常建议 0~1；允许数据源保留>1以表达过载时需在导入规范中明确。"
+          },
+          "propagation_delay": {
+            "type": "object",
+            "description": "传播时延。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "transmission_delay": {
+            "type": "object",
+            "nullable": true,
+            "description": "发送/序列化时延。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "jitter": {
+            "type": "object",
+            "description": "时延抖动。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "packet_loss_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "包丢失率，0~1。"
+          },
+          "bit_error_rate": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "可选比特误码率，0~1。"
+          },
+          "queue": {
+            "$ref": "#/components/schemas/QueueState"
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "链路扩展字段。"
+          }
+        },
+        "required": [
+          "link_id",
+          "enabled",
+          "endpoint_a",
+          "endpoint_b",
+          "link_class",
+          "medium",
+          "max_capacity",
+          "operational",
+          "status",
+          "capacity",
+          "available_bandwidth",
+          "utilization",
+          "propagation_delay",
+          "jitter",
+          "packet_loss_rate"
+        ],
+        "additionalProperties": false
+      },
+      "L2Network": {
+        "type": "object",
+        "description": "当前 scenario_time 下的通信/L2 网络。",
+        "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/L2Link"
+            }
+          }
+        },
+        "required": [
+          "links"
+        ],
+        "additionalProperties": false
+      },
+      "IPAddress": {
+        "type": "object",
+        "description": "L3 地址信息。",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "IPv4 或 IPv6 地址字符串。"
+          },
+          "prefix_length": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 128,
+            "description": "前缀长度。"
+          },
+          "family": {
+            "type": "string",
+            "enum": [
+              "IPV4",
+              "IPV6"
+            ],
+            "description": "地址族。"
+          },
+          "primary": {
+            "type": "boolean",
+            "description": "是否为该 L3 接口主地址。"
+          }
+        },
+        "required": [
+          "address",
+          "prefix_length",
+          "family",
+          "primary"
+        ],
+        "additionalProperties": false
+      },
+      "L3Interface": {
+        "type": "object",
+        "description": "节点上的三层逻辑接口。可关联底层通信终端。",
+        "properties": {
+          "l3_interface_id": {
+            "type": "string",
+            "description": "L3 接口全局唯一 ID。"
+          },
+          "node_id": {
+            "type": "string",
+            "description": "所属节点 ID。"
+          },
+          "terminal_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "可选关联的 L2/通信终端 ID。"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "接口是否启用。"
+          },
+          "mtu": {
+            "type": "object",
+            "description": "接口 MTU。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IPAddress"
+            }
+          },
+          "network_context": {
+            "type": "string",
+            "description": "逻辑网络上下文，例如 default、VRF/租户/Overlay 标识。",
+            "default": "default"
+          }
+        },
+        "required": [
+          "l3_interface_id",
+          "node_id",
+          "enabled",
+          "mtu",
+          "addresses",
+          "network_context"
+        ],
+        "additionalProperties": false
+      },
+      "L3LogicalEndpoint": {
+        "type": "object",
+        "properties": {
+          "node_id": {
+            "type": "string"
+          },
+          "l3_interface_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "node_id",
+          "l3_interface_id"
+        ],
+        "additionalProperties": false
+      },
+      "L3LogicalLink": {
+        "type": "object",
+        "description": "协议无关的三层逻辑直接连接。它不是 OSPF/BGP 邻居关系，可代表 DIRECT、TUNNEL、OVERLAY 等逻辑连接。",
+        "properties": {
+          "logical_link_id": {
+            "type": "string",
+            "description": "三层逻辑链路唯一 ID。"
+          },
+          "endpoint_a": {
+            "$ref": "#/components/schemas/L3LogicalEndpoint"
+          },
+          "endpoint_b": {
+            "$ref": "#/components/schemas/L3LogicalEndpoint"
+          },
+          "network_context": {
+            "type": "string",
+            "default": "default"
+          },
+          "operational": {
+            "type": "boolean",
+            "description": "逻辑链路当前是否有效。"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "DIRECT",
+              "TUNNEL",
+              "OVERLAY",
+              "GENERIC"
+            ],
+            "description": "三层逻辑连接类型。"
+          }
+        },
+        "required": [
+          "logical_link_id",
+          "endpoint_a",
+          "endpoint_b",
+          "network_context",
+          "operational",
+          "type"
+        ],
+        "additionalProperties": false
+      },
+      "Destination": {
+        "type": "object",
+        "description": "L3 Reachability / Forwarding 的目的对象。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NODE",
+              "PREFIX",
+              "ADDRESS"
+            ],
+            "description": "目的对象类型。"
+          },
+          "value": {
+            "type": "string",
+            "description": "node_id、IP prefix 或具体 IP address。"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "ReachabilityEntry": {
+        "type": "object",
+        "description": "从一个源节点到一个 L3 目的对象的可达性。通常可以作为 Derived State。",
+        "properties": {
+          "source_node": {
+            "type": "string"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/Destination"
+          },
+          "reachable": {
+            "type": "boolean"
+          },
+          "derived": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "标识该记录为派生状态。"
+          }
+        },
+        "required": [
+          "source_node",
+          "destination",
+          "reachable",
+          "derived"
+        ],
+        "additionalProperties": false
+      },
+      "NextHop": {
+        "type": "object",
+        "description": "当前节点针对指定目的的实际下一跳。用于表达单路径、ECMP 或加权多路径。",
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "description": "下一跳节点。"
+          },
+          "l3_interface_id": {
+            "type": "string",
+            "description": "出接口。"
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "description": "多路径权重。单路径通常为 1。"
+          }
+        },
+        "required": [
+          "node_id",
+          "l3_interface_id",
+          "weight"
+        ],
+        "additionalProperties": false
+      },
+      "ForwardingEntry": {
+        "type": "object",
+        "description": "协议无关的 L3 转发结果。记录当前实际上如何转发，不记录 OSPF/BGP/IS-IS 等机制如何得到该结果。",
+        "properties": {
+          "forwarding_id": {
+            "type": "string",
+            "description": "Forwarding Entry 唯一 ID。"
+          },
+          "node_id": {
+            "type": "string",
+            "description": "执行该转发决策的节点。"
+          },
+          "network_context": {
+            "type": "string",
+            "default": "default"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/Destination"
+          },
+          "next_hops": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/NextHop"
+            },
+            "description": "有效下一跳集合。"
+          },
+          "valid_from": {
+            "$ref": "#/components/schemas/ScenarioTime"
+          },
+          "valid_until": {
+            "$ref": "#/components/schemas/ScenarioTime",
+            "nullable": true,
+            "description": "可选失效时间。为空表示在当前快照中仍有效。"
+          }
+        },
+        "required": [
+          "forwarding_id",
+          "node_id",
+          "network_context",
+          "destination",
+          "next_hops",
+          "valid_from"
+        ],
+        "additionalProperties": false
+      },
+      "PathMetrics": {
+        "type": "object",
+        "description": "由 Path 与底层 Link/Traffic 状态推导出的端到端路径指标。",
+        "properties": {
+          "hop_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total_delay": {
+            "type": "object",
+            "description": "端到端总时延。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "packet_loss_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "bottleneck_capacity": {
+            "type": "object",
+            "description": "路径瓶颈容量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "hop_count",
+          "total_delay",
+          "packet_loss_rate",
+          "bottleneck_capacity"
+        ],
+        "additionalProperties": false
+      },
+      "L3Path": {
+        "type": "object",
+        "description": "根据 Forwarding State 派生得到的端到端路径。",
+        "properties": {
+          "path_id": {
+            "type": "string"
+          },
+          "source_node": {
+            "type": "string"
+          },
+          "destination_node": {
+            "type": "string"
+          },
+          "network_context": {
+            "type": "string",
+            "default": "default"
+          },
+          "nodes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "logical_links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "valid": {
+            "type": "boolean"
+          },
+          "derived": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/PathMetrics"
+          }
+        },
+        "required": [
+          "path_id",
+          "source_node",
+          "destination_node",
+          "network_context",
+          "nodes",
+          "logical_links",
+          "valid",
+          "derived",
+          "metrics"
+        ],
+        "additionalProperties": false
+      },
+      "L3AggregateState": {
+        "type": "object",
+        "description": "由 L3 状态派生得到的宏观网络指标。",
+        "properties": {
+          "reachable_pair_ratio": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "可达节点对比例。"
+          },
+          "connected_components": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "description": "当前三层连通分量数量。"
+          },
+          "isolated_nodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "当前孤立节点 ID。"
+          }
+        },
+        "additionalProperties": false
+      },
+      "L3Network": {
+        "type": "object",
+        "description": "协议无关的 L3 Network State。",
+        "properties": {
+          "interfaces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/L3Interface"
+            }
+          },
+          "logical_links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/L3LogicalLink"
+            }
+          },
+          "reachability": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReachabilityEntry"
+            }
+          },
+          "forwarding_entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForwardingEntry"
+            }
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/L3Path"
+            }
+          },
+          "aggregate_state": {
+            "$ref": "#/components/schemas/L3AggregateState"
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "interfaces",
+          "logical_links",
+          "forwarding_entries"
+        ],
+        "additionalProperties": false
+      },
+      "TrafficDemand": {
+        "type": "object",
+        "description": "尚未等价于实际 Flow 的网络通信需求：描述谁想向谁发送多少数据或多大速率。",
+        "properties": {
+          "demand_id": {
+            "type": "string"
+          },
+          "source_node": {
+            "type": "string"
+          },
+          "destination_node": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "产生该需求的 Task，可为空。"
+          },
+          "requested_rate": {
+            "type": "object",
+            "nullable": true,
+            "description": "期望速率。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "total_data_size": {
+            "type": "object",
+            "nullable": true,
+            "description": "待传输数据总量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "generated_at": {
+            "$ref": "#/components/schemas/ScenarioTime"
+          }
+        },
+        "required": [
+          "demand_id",
+          "source_node",
+          "destination_node",
+          "generated_at"
+        ],
+        "additionalProperties": false
+      },
+      "FlowState": {
+        "type": "object",
+        "description": "实际网络流在当前 scenario_time 下的状态。",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUED",
+              "ACTIVE",
+              "PAUSED",
+              "COMPLETED",
+              "FAILED"
+            ],
+            "description": "Flow 生命周期状态。"
+          },
+          "offered_rate": {
+            "type": "object",
+            "description": "数据源实际尝试发送的速率。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "allocated_rate": {
+            "type": "object",
+            "description": "网络为该 Flow 分配的速率/带宽。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "actual_throughput": {
+            "type": "object",
+            "description": "实际有效吞吐。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "rtt": {
+            "type": "object",
+            "nullable": true,
+            "description": "往返时延。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "loss_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "bytes_total": {
+            "type": "object",
+            "nullable": true,
+            "description": "Flow 总字节数。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "bytes_sent": {
+            "type": "object",
+            "description": "源端已经发送的字节数。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "bytes_delivered": {
+            "type": "object",
+            "description": "目的端已经成功接收的字节数。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "bytes_remaining": {
+            "type": "object",
+            "nullable": true,
+            "description": "剩余待发送/待完成字节数。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "status",
+          "offered_rate",
+          "allocated_rate",
+          "actual_throughput",
+          "loss_rate",
+          "bytes_sent",
+          "bytes_delivered"
+        ],
+        "additionalProperties": false
+      },
+      "Flow": {
+        "type": "object",
+        "description": "由 Traffic Demand 实际形成的网络传输流。",
+        "properties": {
+          "flow_id": {
+            "type": "string"
+          },
+          "demand_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "task_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "source_node": {
+            "type": "string"
+          },
+          "destination_node": {
+            "type": "string"
+          },
+          "transport_type": {
+            "type": "string",
+            "enum": [
+              "TCP",
+              "UDP",
+              "RAW",
+              "GENERIC"
+            ],
+            "description": "传输类型；仅作为 Flow 特征，不绑定模型结构。"
+          },
+          "path_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "可选引用当前派生 Path。"
+          },
+          "state": {
+            "$ref": "#/components/schemas/FlowState"
+          }
+        },
+        "required": [
+          "flow_id",
+          "source_node",
+          "destination_node",
+          "transport_type",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "ResourceRef": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "LINK",
+              "NODE_COMPUTE",
+              "NODE_STORAGE",
+              "TERMINAL",
+              "GENERIC"
+            ],
+            "description": "被分配的资源类型。"
+          },
+          "resource_id": {
+            "type": "string",
+            "description": "对应资源对象 ID。"
+          }
+        },
+        "required": [
+          "type",
+          "resource_id"
+        ],
+        "additionalProperties": false
+      },
+      "ConsumerRef": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FLOW",
+              "TASK"
+            ],
+            "description": "资源消费者类型。"
+          },
+          "consumer_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "consumer_id"
+        ],
+        "additionalProperties": false
+      },
+      "ResourceAllocation": {
+        "type": "object",
+        "description": "显式表示网络资源当前被谁占用多少，用于学习任务保障、抢占和资源倾斜规律。",
+        "properties": {
+          "allocation_id": {
+            "type": "string"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/ResourceRef"
+          },
+          "consumer": {
+            "$ref": "#/components/schemas/ConsumerRef"
+          },
+          "bandwidth": {
+            "type": "object",
+            "nullable": true,
+            "description": "为消费者分配的带宽。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "compute": {
+            "type": "object",
+            "nullable": true,
+            "description": "为消费者分配的计算资源。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "priority": {
+            "type": "integer",
+            "nullable": true,
+            "description": "该资源分配记录对应的调度优先级。"
+          }
+        },
+        "required": [
+          "allocation_id",
+          "resource",
+          "consumer"
+        ],
+        "additionalProperties": false
+      },
+      "TrafficAggregateState": {
+        "type": "object",
+        "properties": {
+          "total_offered_traffic": {
+            "type": "object",
+            "description": "全网总 offered traffic。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "total_delivered_traffic": {
+            "type": "object",
+            "description": "全网总 delivered traffic。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "congested_links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "被判定为拥塞的 link_id 列表。"
+          }
+        },
+        "required": [
+          "total_offered_traffic",
+          "total_delivered_traffic",
+          "congested_links"
+        ],
+        "additionalProperties": false
+      },
+      "TrafficResource": {
+        "type": "object",
+        "properties": {
+          "demands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrafficDemand"
+            }
+          },
+          "flows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Flow"
+            }
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceAllocation"
+            }
+          },
+          "aggregate_state": {
+            "$ref": "#/components/schemas/TrafficAggregateState"
+          }
+        },
+        "required": [
+          "demands",
+          "flows",
+          "allocations"
+        ],
+        "additionalProperties": false
+      },
+      "TaskPriority": {
+        "type": "object",
+        "description": "任务优先级。数值用于精细比较，class 用于语义分类。",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "description": "优先级数值，值越大表示优先级越高。"
+          },
+          "class": {
+            "type": "string",
+            "enum": [
+              "BACKGROUND",
+              "NORMAL",
+              "HIGH",
+              "MISSION_CRITICAL",
+              "EMERGENCY"
+            ],
+            "description": "语义优先级。"
+          }
+        },
+        "required": [
+          "value",
+          "class"
+        ],
+        "additionalProperties": false
+      },
+      "Constraint": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "constraint_type": {
+            "type": "string",
+            "enum": [
+              "HARD",
+              "SOFT",
+              "OBJECTIVE"
+            ],
+            "description": "HARD=必须满足，SOFT=尽量满足，OBJECTIVE=优化方向。"
+          }
+        },
+        "required": [
+          "enabled",
+          "constraint_type"
+        ],
+        "additionalProperties": true
+      },
+      "TaskRequirements": {
+        "type": "object",
+        "description": "任务对网络和执行过程提出的约束与优化目标。",
+        "properties": {
+          "latency": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "max": {
+                "type": "object",
+                "nullable": true,
+                "description": "任务允许的最大时延。",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "constraint_type": {
+                "type": "string",
+                "enum": [
+                  "HARD",
+                  "SOFT",
+                  "OBJECTIVE"
+                ],
+                "description": "时延要求约束类型。"
+              }
+            },
+            "required": [
+              "enabled",
+              "constraint_type"
+            ],
+            "additionalProperties": false
+          },
+          "reliability": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "minimum_delivery_probability": {
+                "type": "number",
+                "nullable": true,
+                "minimum": 0,
+                "maximum": 1,
+                "description": "最低成功交付概率。"
+              },
+              "constraint_type": {
+                "type": "string",
+                "enum": [
+                  "HARD",
+                  "SOFT",
+                  "OBJECTIVE"
+                ],
+                "description": "可靠性约束类型。"
+              }
+            },
+            "required": [
+              "enabled",
+              "constraint_type"
+            ],
+            "additionalProperties": false
+          },
+          "throughput": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "minimum": {
+                "type": "object",
+                "nullable": true,
+                "description": "最低吞吐要求。",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              },
+              "preferred": {
+                "type": "object",
+                "nullable": true,
+                "description": "偏好的目标吞吐。",
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "nullable": true,
+                    "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "enabled"
+            ],
+            "additionalProperties": false
+          },
+          "completion": {
+            "type": "object",
+            "properties": {
+              "must_complete": {
+                "type": "boolean",
+                "description": "任务是否要求最终完成。"
+              },
+              "deadline_required": {
+                "type": "boolean",
+                "description": "是否要求在 deadline 前完成。"
+              }
+            },
+            "required": [
+              "must_complete",
+              "deadline_required"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "latency",
+          "reliability",
+          "throughput",
+          "completion"
+        ],
+        "additionalProperties": false
+      },
+      "TaskState": {
+        "type": "object",
+        "description": "任务在当前 scenario_time 下的执行状态。",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RUNNING",
+              "PAUSED",
+              "COMPLETED",
+              "FAILED",
+              "CANCELLED"
+            ],
+            "description": "任务生命周期状态。"
+          },
+          "started_at": {
+            "$ref": "#/components/schemas/ScenarioTime",
+            "nullable": true
+          },
+          "completed_at": {
+            "$ref": "#/components/schemas/ScenarioTime",
+            "nullable": true
+          },
+          "progress": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "任务完成进度 0~1。"
+          },
+          "bytes_total": {
+            "type": "object",
+            "description": "任务总数据量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "bytes_sent": {
+            "type": "object",
+            "description": "源端已发送数据量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "bytes_delivered": {
+            "type": "object",
+            "description": "目的端已成功交付数据量。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "estimated_completion_time": {
+            "$ref": "#/components/schemas/ScenarioTime",
+            "nullable": true,
+            "description": "预计任务完成的场景绝对时间，而不是剩余时长。"
+          },
+          "requirement_satisfaction": {
+            "type": "object",
+            "description": "当前任务关键要求是否被满足；unknown 可用 null 表示。",
+            "properties": {
+              "latency_satisfied": {
+                "type": "boolean",
+                "nullable": true
+              },
+              "reliability_satisfied": {
+                "type": "boolean",
+                "nullable": true
+              },
+              "throughput_satisfied": {
+                "type": "boolean",
+                "nullable": true
+              },
+              "deadline_satisfied": {
+                "type": "boolean",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "status",
+          "progress",
+          "bytes_total",
+          "bytes_sent",
+          "bytes_delivered"
+        ],
+        "additionalProperties": false
+      },
+      "Task": {
+        "type": "object",
+        "description": "第一阶段统一业务/任务抽象。Task 可产生 0..N Traffic Demand，并通过 requirements 表达任务保障目标。",
+        "properties": {
+          "task_id": {
+            "type": "string"
+          },
+          "task_type": {
+            "type": "string",
+            "description": "任务类型，由业务系统定义。"
+          },
+          "source_node": {
+            "type": "string"
+          },
+          "destinations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "payload_size": {
+            "type": "object",
+            "description": "任务总负载/数据规模。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "submitted_at": {
+            "$ref": "#/components/schemas/ScenarioTime"
+          },
+          "earliest_start": {
+            "$ref": "#/components/schemas/ScenarioTime",
+            "nullable": true
+          },
+          "deadline": {
+            "$ref": "#/components/schemas/ScenarioTime",
+            "nullable": true
+          },
+          "priority": {
+            "$ref": "#/components/schemas/TaskPriority"
+          },
+          "requirements": {
+            "$ref": "#/components/schemas/TaskRequirements"
+          },
+          "delivery_mode": {
+            "type": "string",
+            "enum": [
+              "GUARANTEED",
+              "BEST_EFFORT",
+              "FIRE_AND_FORGET"
+            ],
+            "description": "GUARANTEED=强调成功交付，BEST_EFFORT=尽力而为，FIRE_AND_FORGET=源端发出即可。"
+          },
+          "completion_criterion": {
+            "type": "string",
+            "enum": [
+              "SOURCE_SENT",
+              "DESTINATION_RECEIVED",
+              "DESTINATION_ACKNOWLEDGED"
+            ],
+            "description": "任务完成的判定语义。"
+          },
+          "can_preempt_others": {
+            "type": "boolean",
+            "description": "该任务是否允许抢占其他任务资源。"
+          },
+          "preemptible": {
+            "type": "boolean",
+            "description": "该任务自身是否允许被其他任务抢占。"
+          },
+          "state": {
+            "$ref": "#/components/schemas/TaskState"
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "task_id",
+          "task_type",
+          "source_node",
+          "destinations",
+          "payload_size",
+          "submitted_at",
+          "priority",
+          "requirements",
+          "delivery_mode",
+          "completion_criterion",
+          "can_preempt_others",
+          "preemptible",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "NetworkIntent": {
+        "type": "object",
+        "description": "网络系统当前的高层目标和任务保障倾向。它不描述具体控制协议，而作为内部 Network Dynamics 的条件。",
+        "properties": {
+          "connectivity": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "preserve_global_connectivity": {
+                "type": "boolean"
+              },
+              "minimum_reachable_pair_ratio": {
+                "type": "number",
+                "nullable": true,
+                "minimum": 0,
+                "maximum": 1,
+                "description": "可选最低全局可达节点对比例。"
+              }
+            },
+            "required": [
+              "enabled",
+              "preserve_global_connectivity"
+            ],
+            "additionalProperties": false
+          },
+          "task_assurance": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "priority_aware": {
+                "type": "boolean"
+              },
+              "preemption_allowed": {
+                "type": "boolean"
+              },
+              "respect_task_qos": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled",
+              "priority_aware",
+              "preemption_allowed",
+              "respect_task_qos"
+            ],
+            "additionalProperties": false
+          },
+          "resource_efficiency": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "avoid_congestion": {
+                "type": "boolean"
+              },
+              "load_balance": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled",
+              "avoid_congestion",
+              "load_balance"
+            ],
+            "additionalProperties": false
+          },
+          "objective_weights": {
+            "type": "object",
+            "description": "可选高层目标权重，可用于条件化世界模型或后续控制研究。",
+            "properties": {
+              "connectivity": {
+                "type": "number",
+                "minimum": 0
+              },
+              "task_assurance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "latency": {
+                "type": "number",
+                "minimum": 0
+              },
+              "reliability": {
+                "type": "number",
+                "minimum": 0
+              },
+              "resource_efficiency": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "connectivity",
+          "task_assurance",
+          "resource_efficiency"
+        ],
+        "additionalProperties": false
+      },
+      "TargetRef": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NODE",
+              "LINK",
+              "TERMINAL",
+              "TASK",
+              "PHYSICAL_WORLD",
+              "INTENT",
+              "GENERIC"
+            ],
+            "description": "事件或外部行为的目标对象类型。"
+          },
+          "id": {
+            "type": "string",
+            "nullable": true,
+            "description": "目标对象 ID。全局对象可为空，例如 PHYSICAL_WORLD。"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "additionalProperties": false
+      },
+      "WorldEvent": {
+        "type": "object",
+        "description": "发生在世界中的外部事件，例如自然故障、干扰或环境变化。",
+        "properties": {
+          "event_id": {
+            "type": "string"
+          },
+          "occurred_at": {
+            "$ref": "#/components/schemas/ScenarioTime"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "NODE_FAILURE",
+              "LINK_FAILURE",
+              "ENVIRONMENT_CHANGE",
+              "INTERFERENCE",
+              "TERMINAL_FAILURE",
+              "GENERIC"
+            ],
+            "description": "事件类型。"
+          },
+          "target": {
+            "$ref": "#/components/schemas/TargetRef"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "事件特有参数，例如故障程度、干扰功率、环境变化量。",
+            "additionalProperties": true
+          },
+          "duration": {
+            "type": "object",
+            "nullable": true,
+            "description": "事件持续时间。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "event_id",
+          "occurred_at",
+          "event_type",
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "ExternalAction": {
+        "type": "object",
+        "description": "从 Network World Model 系统边界之外主动施加的干预。一次 Action 发生后，其影响应反映在后续 World State 中。",
+        "properties": {
+          "action_id": {
+            "type": "string"
+          },
+          "executed_at": {
+            "$ref": "#/components/schemas/ScenarioTime"
+          },
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "TASK_SUBMIT",
+              "TASK_CANCEL",
+              "TASK_MODIFY",
+              "NODE_FORCE_ENABLE",
+              "NODE_FORCE_DISABLE",
+              "LINK_FORCE_UP",
+              "LINK_FORCE_DOWN",
+              "ENVIRONMENT_CHANGE",
+              "INTENT_CHANGE"
+            ],
+            "description": "外部主动干预类型。"
+          },
+          "target": {
+            "$ref": "#/components/schemas/TargetRef"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Action 特有参数。例如 TASK_SUBMIT 可包含 task 定义，INTENT_CHANGE 可包含新的 intent 字段。",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "action_id",
+          "executed_at",
+          "action_type",
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "NetworkDerivedMetrics": {
+        "type": "object",
+        "description": "由基础状态计算得到、用于训练辅助任务、评估和可视化的网络级指标。",
+        "properties": {
+          "reachable_pair_ratio": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1
+          },
+          "average_path_length": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0
+          },
+          "average_rtt": {
+            "type": "object",
+            "nullable": true,
+            "description": "全网平均 RTT。",
+            "properties": {
+              "value": {
+                "type": "number",
+                "nullable": true,
+                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
+              },
+              "unit": {
+                "type": "string",
+                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
+              }
+            },
+            "required": [
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          },
+          "packet_loss_rate": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1
+          },
+          "maximum_link_utilization": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0
+          },
+          "congested_link_count": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      },
+      "TaskDerivedMetrics": {
+        "type": "object",
+        "properties": {
+          "total_tasks": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0
+          },
+          "running_tasks": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0
+          },
+          "completed_tasks": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0
+          },
+          "failed_tasks": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0
+          },
+          "deadline_violation_count": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0
+          },
+          "high_priority_satisfaction_ratio": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "DerivedMetrics": {
+        "type": "object",
+        "description": "所有可由底层状态派生的聚合指标。",
+        "properties": {
+          "network": {
+            "$ref": "#/components/schemas/NetworkDerivedMetrics"
+          },
+          "tasks": {
+            "$ref": "#/components/schemas/TaskDerivedMetrics"
+          }
+        },
+        "required": [
+          "network",
+          "tasks"
+        ],
+        "additionalProperties": false
+      },
+      "NetworkWorldState": {
+        "type": "object",
+        "description": "Network World State v0.1 的顶层快照对象。它表示某一个唯一 scenario_time 下，物理环境、节点、L2、L3、流量/资源、任务和网络意图的完整状态。",
+        "properties": {
+          "schema": {
+            "$ref": "#/components/schemas/SchemaMetadata"
+          },
+          "world_id": {
+            "type": "string",
+            "description": "场景/世界唯一标识。"
+          },
+          "snapshot_id": {
+            "type": "string",
+            "description": "当前 World Snapshot 唯一标识。"
+          },
+          "scenario_time": {
+            "$ref": "#/components/schemas/ScenarioTime"
+          },
+          "delta_time": {
+            "$ref": "#/components/schemas/ScenarioTime",
+            "nullable": true,
+            "description": "与上一 Snapshot 的场景时间间隔。"
+          },
+          "physical_world": {
+            "$ref": "#/components/schemas/PhysicalWorld"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Node"
+            }
+          },
+          "l2_network": {
+            "$ref": "#/components/schemas/L2Network"
+          },
+          "l3_network": {
+            "$ref": "#/components/schemas/L3Network"
+          },
+          "traffic_resource": {
+            "$ref": "#/components/schemas/TrafficResource"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Task"
+            }
+          },
+          "network_intent": {
+            "$ref": "#/components/schemas/NetworkIntent"
+          },
+          "events": {
+            "type": "array",
+            "description": "与当前快照相关、在该时间窗口内发生的 Event。",
+            "items": {
+              "$ref": "#/components/schemas/WorldEvent"
+            }
+          },
+          "external_actions": {
+            "type": "array",
+            "description": "与当前快照相关、在该时间窗口内发生的外部主动 Action。",
+            "items": {
+              "$ref": "#/components/schemas/ExternalAction"
+            }
+          },
+          "derived_metrics": {
+            "$ref": "#/components/schemas/DerivedMetrics",
+            "nullable": true,
+            "description": "可选派生指标。"
+          },
+          "extensions": {
+            "type": "object",
+            "description": "顶层扩展字段。",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "schema",
+          "world_id",
+          "snapshot_id",
+          "scenario_time",
+          "physical_world",
+          "nodes",
+          "l2_network",
+          "l3_network",
+          "traffic_resource",
+          "tasks",
+          "network_intent",
+          "events",
+          "external_actions"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.network-world-model.local",
+      "description": "Default environment"
+    }
+  ]
+}
