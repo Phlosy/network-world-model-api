@@ -1,0 +1,145 @@
+# Vendoring record
+#
+# `network-world-model-api` is the cross-language contract for the Network World
+# State. It deliberately does NOT invent its own time, frame or environment-body
+# semantics: those already have an authoritative definition in the Config API of
+# `astra-emu-api`, and the KubeNet observation contract designates that repository
+# as the semantic source of truth for observation metadata
+# (kubenet/docs/brainstorms/2026-08-02-observation-projection-api-contract.md,
+# section "Contract ownership 与防漂移").
+#
+# Components listed under `vendored` are copied verbatim (schema shape, required
+# list, enum values, additionalProperties) so that generated Go/Python types and
+# the Config API stay interchangeable without a translation layer. Components
+# listed under `restricted` are projections: the NWM contract keeps only the fields
+# it needs, and the omissions are recorded below.
+#
+# Any change to the upstream schema of a vendored component must be mirrored here
+# in the same change; the parity check is part of the contract review.
+
+source:
+  repository: astra-emu-api
+  ref: go/v1.7.4
+  commit: 49f74d4fd326992913ea4e6f36ca515a43062eae
+  contract: contracts/openapi/AstraEmu-Config.openapi.json
+  note: >-
+    KubeNet currently pins astra-emu-api at go/v1.7.3 (see kubenet
+    docs/reference/api-surfaces.md). The pin skew is deliberate for this revision;
+    re-check the vendored components against the KubeNet pin before the next release.
+
+vendored:
+  Instant:
+    from: "#/components/schemas/Instant"
+    note: Absolute instant plus time scale. Required here because scenario_time alone cannot anchor an observation to an external clock.
+  Vec3:
+    from: "#/components/schemas/Vec3"
+    note: array[3] double. Unit is declared in the referencing field name, not in the value.
+  QuaternionXYZW:
+    from: "#/components/schemas/QuaternionXYZW"
+    note: array[4] double, scalar last, active rotation from source frame to target frame. Component order is normative.
+  FrameRef:
+    from: "#/components/schemas/FrameRef"
+  NamedFrameRef:
+    from: "#/components/schemas/NamedFrameRef"
+  NodeBodyFrameRef:
+    from: "#/components/schemas/NodeBodyFrameRef"
+  ReferenceFrame:
+    from: "#/components/schemas/ReferenceFrame"
+  FrameTransform:
+    from: "#/components/schemas/FrameTransform"
+  IdentityFrameTransform:
+    from: "#/components/schemas/IdentityFrameTransform"
+  FixedFrameTransform:
+    from: "#/components/schemas/FixedFrameTransform"
+  UniformRotationFrameTransform:
+    from: "#/components/schemas/UniformRotationFrameTransform"
+  EphemerisFrameTransform:
+    from: "#/components/schemas/EphemerisFrameTransform"
+    adaptation: >-
+      Upstream types `provider` as SpatialProviderName (a Config resource key).
+      Here it is a plain string so this contract does not depend on the Config
+      resource-key vocabulary. The reference semantics are unchanged.
+  BodyShape:
+    from: "#/components/schemas/BodyShape"
+  SphereBodyShape:
+    from: "#/components/schemas/SphereBodyShape"
+  OblateEllipsoidBodyShape:
+    from: "#/components/schemas/OblateEllipsoidBodyShape"
+  ObservationPositionFormat:
+    from: "#/components/schemas/ObservationPositionFormat"
+  CartesianObservationFormat:
+    from: "#/components/schemas/CartesianObservationFormat"
+  GeodeticObservationFormat:
+    from: "#/components/schemas/GeodeticObservationFormat"
+  ReferenceFrameName:
+    from: "#/components/schemas/ReferenceFrameName"
+    adaptation: inlined
+  EnvironmentBodyName:
+    from: "#/components/schemas/EnvironmentBodyName"
+    adaptation: inlined
+
+restricted:
+  EnvironmentBody:
+    from: "#/components/schemas/EnvironmentBody"
+    kept: [name, shape, inertial_frame, fixed_frame]
+    omitted: [gravity, atmosphere, metadata]
+    reason: >-
+      The NWM contract needs an environment body only to interpret geodetic
+      positions (datum shape) and to name the body-fixed frame. Gravity and
+      atmosphere models belong to the Config API; duplicating them here would
+      create a second atmosphere model alongside the existing PhysicalWorld
+      environment model.
+
+native:
+  # Defined by this repository; no upstream counterpart.
+  TimeBase:
+    reason: >-
+      Neither side currently declares how the world-model timeline (scenario_time,
+      relative seconds) relates to the absolute Instants reported by sources.
+      Without it, ObservationStamp.observed_at_instant cannot be reconciled with
+      scenario_time.
+  ObservationStamp:
+    reason: >-
+      Provenance and validity window of a single observation of a single entity.
+      Basis of asynchronous/partial observation alignment. Distinct from the exact
+      sample instant that a future KinematicObservation will carry.
+  Provenance:
+    reason: Snapshot-level data lineage; a snapshot must be interpretable without external records.
+  Availability:
+    reason: >-
+      First-class observability. External systems report coverage/partial/unknown
+      extensively (Analytics partial, physical-resource bound/unbound/unknown);
+      without it, "not observed" is silently trained as a real value such as zero.
+
+deferred:
+  # Deliberately NOT vendored in this revision.
+  ObservationProfile:
+    reason: >-
+      Query-side selection (Profile | Inline) belongs to the observation APIs that
+      serve it. The state contract only needs the resolved frame and position
+      format.
+  ObservationSelection:
+    reason: Query-side concept; not part of a state snapshot.
+  KinematicObservation:
+    reason: >-
+      Planned for phase P2, replacing the current Position/Velocity/Orientation
+      trio. Waiting for the KubeNet observation contract to leave draft status so
+      the field set is not reworked twice.
+  GravityField:
+    reason: Owned by the Config API; not consumed by the world model.
+  Atmosphere:
+    reason: >-
+      Owned by the Config API. PhysicalWorld carries the world model's own
+      environment model, which must not be silently merged with it.
+
+inlined:
+  # Upstream represents these Config resource keys as `allOf: [ConfigResourceKey]`,
+  # i.e. nominal string types. A named bare-string schema becomes a RootModel
+  # wrapper in the generated Python SDK, which is inconsistent with the inline
+  # constrained strings this contract already uses (for example
+  # NodeBodyFrameRef.node), so the constraints are inlined into each property and
+  # the nominal type is dropped. Validation behaviour is identical.
+  ReferenceFrameName:
+    used_by: [NamedFrameRef.name, ReferenceFrame.name]
+  EnvironmentBodyName:
+    used_by: [EnvironmentBody.name, GeodeticObservationFormat.body]

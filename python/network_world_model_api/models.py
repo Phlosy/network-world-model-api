@@ -4,9 +4,19 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, confloat, conint
+from pydantic import (
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    Field,
+    PositiveFloat,
+    RootModel,
+    confloat,
+    conint,
+    constr,
+)
 
 
 class Unit(Enum):
@@ -310,28 +320,6 @@ class ElectromagneticEnvironment(BaseModel):
     )
 
 
-class PhysicalWorld(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    environment_type: EnvironmentType = Field(
-        ...,
-        description='场景的宏观物理环境分类，仅用于描述和筛选，不决定核心计算逻辑。',
-    )
-    spatial_environment: SpatialEnvironment = Field(
-        ..., description='空间/地理参考环境。'
-    )
-    atmosphere: Atmosphere | None = Field(
-        None, description='大气环境条件。可由仿真系统直接采集并映射。'
-    )
-    electromagnetic_environment: ElectromagneticEnvironment | None = Field(
-        None, description='电磁背景、噪声和干扰环境。'
-    )
-    extensions: dict[str, Any] | None = Field(
-        None, description='物理世界的扩展属性。扩展字段不应改变核心 Schema 语义。'
-    )
-
-
 class CpuComputeCapacity(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -632,31 +620,6 @@ class CommunicationTerminalState(BaseModel):
     current_power: CurrentPower | None = Field(None, description='当前发射功率。')
 
 
-class NodeState(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    position: Position
-    velocity: Velocity
-    orientation: Orientation | None = None
-    operational: bool = Field(..., description='节点整体是否处于工作状态。')
-    health_score: confloat(ge=0.0, le=1.0) | None = Field(
-        None, description='可选健康度，0 表示完全不可用，1 表示完全健康。'
-    )
-    faults: list[str] | None = Field(None, description='当前生效的故障/异常标识。')
-    cpu_utilization: confloat(ge=0.0, le=1.0) | None = Field(
-        None, description='CPU 利用率，统一使用 0~1。'
-    )
-    gpu_utilization: confloat(ge=0.0, le=1.0) | None = Field(
-        None, description='GPU 利用率，统一使用 0~1。'
-    )
-    memory_utilization: confloat(ge=0.0, le=1.0) | None = Field(
-        None, description='内存利用率，统一使用 0~1。'
-    )
-    communication_terminals: list[CommunicationTerminalState]
-    extensions: dict[str, Any] | None = Field(None, description='节点动态状态扩展。')
-
-
 class NodeType(Enum):
     SATELLITE = 'SATELLITE'
     GROUND_STATION = 'GROUND_STATION'
@@ -669,21 +632,6 @@ class NodeType(Enum):
     SWITCH = 'SWITCH'
     TERMINAL = 'TERMINAL'
     GENERIC = 'GENERIC'
-
-
-class Node(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    node_id: str = Field(..., description='在 world_id 范围内全局唯一的节点 ID。')
-    node_type: NodeType = Field(
-        ..., description='节点类型。该枚举用于分类，不应驱动核心模型中的场景特化逻辑。'
-    )
-    name: str | None = Field(None, description='可读名称。')
-    enabled: bool = Field(..., description='节点是否属于当前场景。')
-    capabilities: NodeCapabilities
-    state: NodeState
-    extensions: dict[str, Any] | None = Field(None, description='节点级扩展字段。')
 
 
 class L2Endpoint(BaseModel):
@@ -836,47 +784,6 @@ class Jitter(BaseModel):
     )
 
 
-class L2Link(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    link_id: str = Field(..., description='L2 Link 全局唯一标识。')
-    enabled: bool = Field(..., description='该 Link 是否属于当前场景配置。')
-    endpoint_a: L2Endpoint
-    endpoint_b: L2Endpoint
-    link_class: LinkClass = Field(..., description='场景语义上的链路分类。')
-    medium: Medium = Field(..., description='实际通信媒介。')
-    max_capacity: MaxCapacity = Field(..., description='链路静态/理论最大容量。')
-    operational: bool = Field(..., description='链路当前是否可工作。')
-    status: Status = Field(..., description='链路当前运行状态。')
-    capacity: Capacity = Field(..., description='当前有效容量。')
-    available_bandwidth: AvailableBandwidth = Field(..., description='当前可用带宽。')
-    utilization: confloat(ge=0.0) = Field(
-        ...,
-        description='当前利用率。通常建议 0~1；允许数据源保留>1以表达过载时需在导入规范中明确。',
-    )
-    propagation_delay: PropagationDelay = Field(..., description='传播时延。')
-    transmission_delay: TransmissionDelay | None = Field(
-        None, description='发送/序列化时延。'
-    )
-    jitter: Jitter = Field(..., description='时延抖动。')
-    packet_loss_rate: confloat(ge=0.0, le=1.0) = Field(
-        ..., description='包丢失率，0~1。'
-    )
-    bit_error_rate: confloat(ge=0.0, le=1.0) | None = Field(
-        None, description='可选比特误码率，0~1。'
-    )
-    queue: QueueState | None = None
-    extensions: dict[str, Any] | None = Field(None, description='链路扩展字段。')
-
-
-class L2Network(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    links: list[L2Link]
-
-
 class Family(Enum):
     IPV4 = 'IPV4'
     IPV6 = 'IPV6'
@@ -905,21 +812,6 @@ class Mtu(BaseModel):
     )
 
 
-class L3Interface(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    l3_interface_id: str = Field(..., description='L3 接口全局唯一 ID。')
-    node_id: str = Field(..., description='所属节点 ID。')
-    terminal_id: str | None = Field(None, description='可选关联的 L2/通信终端 ID。')
-    enabled: bool = Field(..., description='接口是否启用。')
-    mtu: Mtu = Field(..., description='接口 MTU。')
-    addresses: list[IPAddress]
-    network_context: str = Field(
-        ..., description='逻辑网络上下文，例如 default、VRF/租户/Overlay 标识。'
-    )
-
-
 class L3LogicalEndpoint(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -933,18 +825,6 @@ class Type(Enum):
     TUNNEL = 'TUNNEL'
     OVERLAY = 'OVERLAY'
     GENERIC = 'GENERIC'
-
-
-class L3LogicalLink(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    logical_link_id: str = Field(..., description='三层逻辑链路唯一 ID。')
-    endpoint_a: L3LogicalEndpoint
-    endpoint_b: L3LogicalEndpoint
-    network_context: str
-    operational: bool = Field(..., description='逻辑链路当前是否有效。')
-    type: Type = Field(..., description='三层逻辑连接类型。')
 
 
 class Type1(Enum):
@@ -982,21 +862,6 @@ class NextHop(BaseModel):
     node_id: str = Field(..., description='下一跳节点。')
     l3_interface_id: str = Field(..., description='出接口。')
     weight: confloat(ge=0.0) = Field(..., description='多路径权重。单路径通常为 1。')
-
-
-class ForwardingEntry(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    forwarding_id: str = Field(..., description='Forwarding Entry 唯一 ID。')
-    node_id: str = Field(..., description='执行该转发决策的节点。')
-    network_context: str
-    destination: Destination
-    next_hops: list[NextHop] = Field(..., description='有效下一跳集合。', min_length=1)
-    valid_from: ScenarioTime
-    valid_until: ScenarioTime | None = Field(
-        None, description='可选失效时间。为空表示在当前快照中仍有效。'
-    )
 
 
 class TotalDelay(BaseModel):
@@ -1063,19 +928,6 @@ class L3AggregateState(BaseModel):
     isolated_nodes: list[str] | None = Field(None, description='当前孤立节点 ID。')
 
 
-class L3Network(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    interfaces: list[L3Interface]
-    logical_links: list[L3LogicalLink]
-    reachability: list[ReachabilityEntry] | None = None
-    forwarding_entries: list[ForwardingEntry]
-    paths: list[L3Path] | None = None
-    aggregate_state: L3AggregateState | None = None
-    extensions: dict[str, Any] | None = None
-
-
 class RequestedRate(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -1100,19 +952,6 @@ class TotalDataSize(BaseModel):
         ...,
         description='物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。',
     )
-
-
-class TrafficDemand(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    demand_id: str
-    source_node: str
-    destination_node: str
-    task_id: str | None = Field(None, description='产生该需求的 Task，可为空。')
-    requested_rate: RequestedRate | None = Field(None, description='期望速率。')
-    total_data_size: TotalDataSize | None = Field(None, description='待传输数据总量。')
-    generated_at: ScenarioTime
 
 
 class Status1(Enum):
@@ -1256,22 +1095,6 @@ class TransportType(Enum):
     GENERIC = 'GENERIC'
 
 
-class Flow(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    flow_id: str
-    demand_id: str | None = None
-    task_id: str | None = None
-    source_node: str
-    destination_node: str
-    transport_type: TransportType = Field(
-        ..., description='传输类型；仅作为 Flow 特征，不绑定模型结构。'
-    )
-    path_id: str | None = Field(None, description='可选引用当前派生 Path。')
-    state: FlowState
-
-
 class Type2(Enum):
     LINK = 'LINK'
     NODE_COMPUTE = 'NODE_COMPUTE'
@@ -1327,18 +1150,6 @@ class Compute(BaseModel):
     )
 
 
-class ResourceAllocation(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    allocation_id: str
-    resource: ResourceRef
-    consumer: ConsumerRef
-    bandwidth: Bandwidth | None = Field(None, description='为消费者分配的带宽。')
-    compute: Compute | None = Field(None, description='为消费者分配的计算资源。')
-    priority: int | None = Field(None, description='该资源分配记录对应的调度优先级。')
-
-
 class TotalOfferedTraffic(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -1376,16 +1187,6 @@ class TrafficAggregateState(BaseModel):
         ..., description='全网总 delivered traffic。'
     )
     congested_links: list[str] = Field(..., description='被判定为拥塞的 link_id 列表。')
-
-
-class TrafficResource(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    demands: list[TrafficDemand]
-    flows: list[Flow]
-    allocations: list[ResourceAllocation]
-    aggregate_state: TrafficAggregateState | None = None
 
 
 class Class(Enum):
@@ -1569,35 +1370,6 @@ class CompletionCriterion(Enum):
     DESTINATION_ACKNOWLEDGED = 'DESTINATION_ACKNOWLEDGED'
 
 
-class Task(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    task_id: str
-    task_type: str = Field(..., description='任务类型，由业务系统定义。')
-    source_node: str
-    destinations: list[str] = Field(..., min_length=1)
-    payload_size: PayloadSize = Field(..., description='任务总负载/数据规模。')
-    submitted_at: ScenarioTime
-    earliest_start: ScenarioTime | None = None
-    deadline: ScenarioTime | None = None
-    priority: TaskPriority
-    requirements: TaskRequirements
-    delivery_mode: DeliveryMode = Field(
-        ...,
-        description='GUARANTEED=强调成功交付，BEST_EFFORT=尽力而为，FIRE_AND_FORGET=源端发出即可。',
-    )
-    completion_criterion: CompletionCriterion = Field(
-        ..., description='任务完成的判定语义。'
-    )
-    can_preempt_others: bool = Field(
-        ..., description='该任务是否允许抢占其他任务资源。'
-    )
-    preemptible: bool = Field(..., description='该任务自身是否允许被其他任务抢占。')
-    state: TaskState
-    extensions: dict[str, Any] | None = None
-
-
 class Connectivity(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -1637,19 +1409,6 @@ class ObjectiveWeights(BaseModel):
     latency: confloat(ge=0.0) | None = None
     reliability: confloat(ge=0.0) | None = None
     resource_efficiency: confloat(ge=0.0) | None = None
-
-
-class NetworkIntent(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    connectivity: Connectivity
-    task_assurance: TaskAssurance
-    resource_efficiency: ResourceEfficiency
-    objective_weights: ObjectiveWeights | None = Field(
-        None, description='可选高层目标权重，可用于条件化世界模型或后续控制研究。'
-    )
-    extensions: dict[str, Any] | None = None
 
 
 class Type4(Enum):
@@ -1779,6 +1538,677 @@ class DerivedMetrics(BaseModel):
     tasks: TaskDerivedMetrics
 
 
+class Scale(Enum):
+    TimeScaleUTC = 'UTC'
+    TimeScaleTAI = 'TAI'
+    TimeScaleTT = 'TT'
+    TimeScaleTDB = 'TDB'
+
+
+class Instant(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    value: constr(
+        pattern=r'^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:([0-5][0-9]|60)(\.[0-9]+)?$'
+    ) = Field(
+        ...,
+        description='不带时区后缀的扩展 ISO-8601 时刻 YYYY-MM-DDThh:mm:ss[.fraction]；秒值 60 只允许用于经版本化 leap-second 数据验证后的 UTC。',
+        examples=['2026-01-01T00:00:00'],
+    )
+    scale: Scale = Field(
+        ...,
+        description='时间尺度。UTC=协调世界时；TAI=国际原子时；TT=地球时；TDB=太阳系质心力学时。没有 scale 的时刻无法被独立解释。',
+    )
+
+
+class TimeBase(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    scenario_epoch: Instant = Field(
+        ..., description='scenario_time = 0 所对应的绝对时刻。'
+    )
+    simulation_start: Instant = Field(
+        ...,
+        description='仿真真正开始推进的绝对时刻。通常与 scenario_epoch 相同；外部系统在正式推进前预置初始状态时二者可以不同。',
+    )
+    tick_s: PositiveFloat | None = Field(
+        None,
+        description='逻辑仿真 tick 长度，单位为秒。用于表达观测的最细时间粒度，也是时序对齐 binning 窗口的下界。',
+    )
+
+
+class Sampling(Enum):
+    SamplingExact = 'Exact'
+    SamplingPrevious = 'Previous'
+    SamplingNearest = 'Nearest'
+
+
+class ObservationStamp(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    observed_at_instant: Instant | None = Field(
+        None, description='源系统报告该值产生的绝对时刻。'
+    )
+    observed_at_scenario_time: ScenarioTime | None = Field(
+        None, description='该值对齐到世界模型时间轴后的时刻。'
+    )
+    valid_from: ScenarioTime | None = Field(
+        None, description='该值开始适用的场景时刻。'
+    )
+    valid_until: ScenarioTime | None = Field(
+        None, description='该值不再适用的场景时刻（不含）；省略表示一直有效。'
+    )
+    source_system: constr(min_length=1) = Field(
+        ..., description='产生该观测的外部系统名称。'
+    )
+    source_record_id: str | None = Field(
+        None, description='源系统内部的记录标识，不要求全局唯一。'
+    )
+    sampling: Sampling | None = Field(
+        None,
+        description='该观测相对请求时刻的采样策略。Replay 场景必须显式声明，不允许由 adapter 自行选择，否则回放结果不可复现。',
+    )
+
+
+class Provenance(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    source_system: constr(min_length=1) = Field(
+        ..., description='产生原始数据的外部系统名称。'
+    )
+    source_record_ids: list[str] | None = Field(
+        None, description='参与该快照的原始记录标识。'
+    )
+    adapter: str | None = Field(None, description='执行映射的 adapter 名称。')
+    adapter_version: str | None = Field(
+        None, description='映射规范（mapping spec）的名称与版本；用于精确复现数据集。'
+    )
+    simulation_run_id: str | None = Field(None, description='外部仿真系统的运行标识。')
+    raw_source_refs: list[str] | None = Field(
+        None, description='原始文件或流的引用（路径、URI 或对象名）。'
+    )
+    imported_at: AwareDatetime | None = Field(
+        None, description='导入发生的墙上时钟时间；仅用于审计，不参与任何计算。'
+    )
+    notes: str | None = None
+
+
+class State(Enum):
+    AvailabilityObserved = 'observed'
+    AvailabilityDerived = 'derived'
+    AvailabilityUnavailable = 'unavailable'
+    AvailabilityUnknown = 'unknown'
+
+
+class Availability(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    state: State = Field(
+        ...,
+        description='observed=直接观测到；derived=由其他观测计算得到；unavailable=当前条件下不可观测；unknown=来源未声明。',
+    )
+    coverage_ratio: confloat(ge=0.0, le=1.0) | None = Field(
+        None, description='该量在聚合范围内的覆盖率；1 表示完整覆盖。'
+    )
+    partial: bool | None = Field(
+        None,
+        description='true 表示结果基于部分可见数据得出，只能解释为部分统计，不能当作完整结论。',
+    )
+    reason: str | None = Field(
+        None,
+        description='unavailable / unknown / partial 的原因标识，便于消费方区分「源不支持该量」与「暂时不可达」。',
+    )
+
+
+class Vec3(RootModel[list[float]]):
+    root: list[float] = Field(
+        ...,
+        description='三维向量 [x, y, z]，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Vec3，语义保持一致。 单位由引用它的字段名声明显式声明（例如 _m、_m_s、_rad_s），不得依赖调用方推测。',
+        max_length=3,
+        min_length=3,
+    )
+
+
+class QuaternionXYZW(RootModel[list[float]]):
+    root: list[float] = Field(
+        ...,
+        description='单位四元数 [x, y, z, w]（标量在最后），vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 QuaternionXYZW，语义保持一致。 表示从字段名所指 source frame 到 target frame 的主动旋转；分量顺序固定为 XYZW，禁止使用 wxyz 顺序。',
+        max_length=4,
+        min_length=4,
+    )
+
+
+class Type5(Enum):
+    FrameKindNamedFrame = 'NamedFrame'
+
+
+class NamedFrameRef(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    type: Literal['NamedFrame'] = Field(..., description='引用种类判别字段。')
+    name: constr(min_length=1) = Field(
+        ...,
+        description='场景内稳定的命名参考系标识；同一场景内唯一，且不得使用显示名。',
+    )
+
+
+class Type6(Enum):
+    FrameKindNodeBodyFrame = 'NodeBodyFrame'
+
+
+class NodeBodyFrameRef(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    type: Literal['NodeBodyFrame'] = Field(..., description='引用种类判别字段。')
+    node: constr(min_length=1) = Field(..., description='场景实体的稳定名称。')
+
+
+class FrameRef(RootModel[NamedFrameRef | NodeBodyFrameRef]):
+    root: NamedFrameRef | NodeBodyFrameRef = Field(
+        ...,
+        description='参考系引用：命名参考系或场景实体机体系，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameRef，语义保持一致。 任何坐标都必须能通过 FrameRef 独立解释；不得从字段名、实体名或调用方类型猜测参考系。',
+        discriminator='type',
+    )
+
+
+class Type7(Enum):
+    FrameTransformIdentity = 'Identity'
+
+
+class IdentityFrameTransform(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    type: Literal['Identity']
+
+
+class Type8(Enum):
+    FrameTransformFixed = 'Fixed'
+
+
+class FixedFrameTransform(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    type: Literal['Fixed']
+    translation_parent_m: Vec3 = Field(
+        ..., description='子参考系原点在父参考系中的位置，单位为米。'
+    )
+    rotation_child_to_parent_xyzw: QuaternionXYZW = Field(
+        ..., description='子参考系到父参考系的主动旋转。'
+    )
+
+
+class Type9(Enum):
+    FrameTransformUniformRotation = 'UniformRotation'
+
+
+class UniformRotationFrameTransform(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    type: Literal['UniformRotation']
+    epoch: Instant = Field(..., description='相位锚定的历元。')
+    origin_parent_m: Vec3 = Field(
+        ..., description='子参考系原点在父参考系中的位置，单位为米。'
+    )
+    axis_parent: Vec3 = Field(
+        ..., description='父参考系中的旋转轴；必须为有限非零向量。'
+    )
+    rate_rad_s: float = Field(..., description='角速度，单位为 rad/s。')
+    phase_at_epoch_rad: float = Field(
+        ..., description='历元时绕旋转轴的相位，单位为 rad。'
+    )
+
+
+class Type10(Enum):
+    FrameTransformEphemeris = 'Ephemeris'
+
+
+class EphemerisFrameTransform(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    type: Literal['Ephemeris']
+    provider: constr(min_length=1) = Field(
+        ..., description='版本化空间 provider 的名称。'
+    )
+    observer: str = Field(..., description='观察者标识。')
+    target: str = Field(..., description='目标标识。')
+    orientation: str | None = Field(None, description='姿态表达约定。')
+    derivative_order: str = Field(..., description='导数阶数约定。')
+
+
+class FrameTransform(
+    RootModel[
+        IdentityFrameTransform
+        | FixedFrameTransform
+        | UniformRotationFrameTransform
+        | EphemerisFrameTransform
+    ]
+):
+    root: (
+        IdentityFrameTransform
+        | FixedFrameTransform
+        | UniformRotationFrameTransform
+        | EphemerisFrameTransform
+    ) = Field(
+        ...,
+        description='参考系变换链上的一环，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameTransform，语义保持一致。',
+        discriminator='type',
+    )
+
+
+class ReferenceFrame(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    name: constr(min_length=1) = Field(
+        ...,
+        description='场景内稳定的命名参考系标识；同一场景内唯一，且不得使用显示名。',
+    )
+    parent: NamedFrameRef | None = Field(
+        None, description='父参考系；省略表示这是根参考系。'
+    )
+    transform: FrameTransform
+
+
+class Type11(Enum):
+    BodyShapeSphere = 'Sphere'
+
+
+class SphereBodyShape(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    type: Literal['Sphere']
+    radius_m: PositiveFloat = Field(..., description='球半径，单位为米。')
+
+
+class Type12(Enum):
+    BodyShapeOblateEllipsoid = 'OblateEllipsoid'
+
+
+class OblateEllipsoidBodyShape(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    type: Literal['OblateEllipsoid']
+    semi_major_axis_m: PositiveFloat = Field(..., description='长半轴，单位为米。')
+    inverse_flattening: PositiveFloat = Field(..., description='扁率倒数 1/f。')
+
+
+class BodyShape(RootModel[SphereBodyShape | OblateEllipsoidBodyShape]):
+    root: SphereBodyShape | OblateEllipsoidBodyShape = Field(
+        ...,
+        description='天体形状。它同时是大地坐标的 datum：没有 shape 就无法解释经纬高。',
+        discriminator='type',
+    )
+
+
+class EnvironmentBody(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    name: constr(min_length=1) = Field(
+        ..., description='场景内稳定的环境天体标识；同一场景内唯一。'
+    )
+    shape: BodyShape
+    inertial_frame: FrameRef = Field(..., description='该天体的惯性参考系。')
+    fixed_frame: FrameRef = Field(
+        ..., description='该天体的固连参考系；大地坐标只允许与该帧组合。'
+    )
+
+
+class Type13(Enum):
+    PositionFormatCartesian = 'Cartesian'
+
+
+class CartesianObservationFormat(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    type: Literal['Cartesian']
+
+
+class Type14(Enum):
+    PositionFormatGeodetic = 'Geodetic'
+
+
+class GeodeticObservationFormat(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    type: Literal['Geodetic']
+    body: constr(min_length=1) = Field(
+        ..., description='场景内稳定的环境天体标识；同一场景内唯一。'
+    )
+
+
+class ObservationPositionFormat(
+    RootModel[CartesianObservationFormat | GeodeticObservationFormat]
+):
+    root: CartesianObservationFormat | GeodeticObservationFormat = Field(
+        ...,
+        description='位置表达格式，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 ObservationPositionFormat，语义保持一致。 消费方必须按 response 中解析后的格式解释数值，不得把任意笛卡尔坐标自动当作地球固连坐标。',
+        discriminator='type',
+    )
+
+
+class PhysicalWorld(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    environment_type: EnvironmentType = Field(
+        ...,
+        description='场景的宏观物理环境分类，仅用于描述和筛选，不决定核心计算逻辑。',
+    )
+    spatial_environment: SpatialEnvironment = Field(
+        ..., description='空间/地理参考环境。'
+    )
+    atmosphere: Atmosphere | None = Field(
+        None, description='大气环境条件。可由仿真系统直接采集并映射。'
+    )
+    electromagnetic_environment: ElectromagneticEnvironment | None = Field(
+        None, description='电磁背景、噪声和干扰环境。'
+    )
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+    extensions: dict[str, Any] | None = Field(
+        None, description='物理世界的扩展属性。扩展字段不应改变核心 Schema 语义。'
+    )
+
+
+class NodeState(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    position: Position
+    velocity: Velocity
+    orientation: Orientation | None = None
+    operational: bool = Field(..., description='节点整体是否处于工作状态。')
+    health_score: confloat(ge=0.0, le=1.0) | None = Field(
+        None, description='可选健康度，0 表示完全不可用，1 表示完全健康。'
+    )
+    faults: list[str] | None = Field(None, description='当前生效的故障/异常标识。')
+    cpu_utilization: confloat(ge=0.0, le=1.0) | None = Field(
+        None, description='CPU 利用率，统一使用 0~1。'
+    )
+    gpu_utilization: confloat(ge=0.0, le=1.0) | None = Field(
+        None, description='GPU 利用率，统一使用 0~1。'
+    )
+    memory_utilization: confloat(ge=0.0, le=1.0) | None = Field(
+        None, description='内存利用率，统一使用 0~1。'
+    )
+    communication_terminals: list[CommunicationTerminalState]
+    availability: Availability | None = Field(
+        None,
+        description='该对象动态状态的可观测性。不可观测时不得用默认值填充具体字段，必须在 availability 中显式声明 state=unavailable。',
+    )
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+    extensions: dict[str, Any] | None = Field(None, description='节点动态状态扩展。')
+
+
+class Node(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    node_id: str = Field(..., description='在 world_id 范围内全局唯一的节点 ID。')
+    node_type: NodeType = Field(
+        ..., description='节点类型。该枚举用于分类，不应驱动核心模型中的场景特化逻辑。'
+    )
+    name: str | None = Field(None, description='可读名称。')
+    enabled: bool = Field(..., description='节点是否属于当前场景。')
+    capabilities: NodeCapabilities
+    state: NodeState
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+    extensions: dict[str, Any] | None = Field(None, description='节点级扩展字段。')
+
+
+class L2Link(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    link_id: str = Field(..., description='L2 Link 全局唯一标识。')
+    enabled: bool = Field(..., description='该 Link 是否属于当前场景配置。')
+    endpoint_a: L2Endpoint
+    endpoint_b: L2Endpoint
+    link_class: LinkClass = Field(..., description='场景语义上的链路分类。')
+    medium: Medium = Field(..., description='实际通信媒介。')
+    max_capacity: MaxCapacity = Field(..., description='链路静态/理论最大容量。')
+    operational: bool = Field(..., description='链路当前是否可工作。')
+    status: Status = Field(..., description='链路当前运行状态。')
+    capacity: Capacity = Field(..., description='当前有效容量。')
+    available_bandwidth: AvailableBandwidth = Field(..., description='当前可用带宽。')
+    utilization: confloat(ge=0.0) = Field(
+        ...,
+        description='当前利用率。通常建议 0~1；允许数据源保留>1以表达过载时需在导入规范中明确。',
+    )
+    propagation_delay: PropagationDelay = Field(..., description='传播时延。')
+    transmission_delay: TransmissionDelay | None = Field(
+        None, description='发送/序列化时延。'
+    )
+    jitter: Jitter = Field(..., description='时延抖动。')
+    packet_loss_rate: confloat(ge=0.0, le=1.0) = Field(
+        ..., description='包丢失率，0~1。'
+    )
+    bit_error_rate: confloat(ge=0.0, le=1.0) | None = Field(
+        None, description='可选比特误码率，0~1。'
+    )
+    queue: QueueState | None = None
+    availability: Availability | None = Field(
+        None,
+        description='该对象动态状态的可观测性。不可观测时不得用默认值填充具体字段，必须在 availability 中显式声明 state=unavailable。',
+    )
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+    extensions: dict[str, Any] | None = Field(None, description='链路扩展字段。')
+
+
+class L2Network(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    links: list[L2Link]
+
+
+class L3Interface(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    l3_interface_id: str = Field(..., description='L3 接口全局唯一 ID。')
+    node_id: str = Field(..., description='所属节点 ID。')
+    terminal_id: str | None = Field(None, description='可选关联的 L2/通信终端 ID。')
+    enabled: bool = Field(..., description='接口是否启用。')
+    mtu: Mtu = Field(..., description='接口 MTU。')
+    addresses: list[IPAddress]
+    network_context: str = Field(
+        ..., description='逻辑网络上下文，例如 default、VRF/租户/Overlay 标识。'
+    )
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+
+
+class L3LogicalLink(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    logical_link_id: str = Field(..., description='三层逻辑链路唯一 ID。')
+    endpoint_a: L3LogicalEndpoint
+    endpoint_b: L3LogicalEndpoint
+    network_context: str
+    operational: bool = Field(..., description='逻辑链路当前是否有效。')
+    type: Type = Field(..., description='三层逻辑连接类型。')
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+
+
+class ForwardingEntry(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    forwarding_id: str = Field(..., description='Forwarding Entry 唯一 ID。')
+    node_id: str = Field(..., description='执行该转发决策的节点。')
+    network_context: str
+    destination: Destination
+    next_hops: list[NextHop] = Field(..., description='有效下一跳集合。', min_length=1)
+    valid_from: ScenarioTime
+    valid_until: ScenarioTime | None = Field(
+        None, description='可选失效时间。为空表示在当前快照中仍有效。'
+    )
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+
+
+class L3Network(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    interfaces: list[L3Interface]
+    logical_links: list[L3LogicalLink]
+    reachability: list[ReachabilityEntry] | None = None
+    forwarding_entries: list[ForwardingEntry]
+    paths: list[L3Path] | None = None
+    aggregate_state: L3AggregateState | None = None
+    extensions: dict[str, Any] | None = None
+
+
+class TrafficDemand(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    demand_id: str
+    source_node: str
+    destination_node: str
+    task_id: str | None = Field(None, description='产生该需求的 Task，可为空。')
+    requested_rate: RequestedRate | None = Field(None, description='期望速率。')
+    total_data_size: TotalDataSize | None = Field(None, description='待传输数据总量。')
+    generated_at: ScenarioTime
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+
+
+class Flow(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    flow_id: str
+    demand_id: str | None = None
+    task_id: str | None = None
+    source_node: str
+    destination_node: str
+    transport_type: TransportType = Field(
+        ..., description='传输类型；仅作为 Flow 特征，不绑定模型结构。'
+    )
+    path_id: str | None = Field(None, description='可选引用当前派生 Path。')
+    state: FlowState
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+
+
+class ResourceAllocation(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    allocation_id: str
+    resource: ResourceRef
+    consumer: ConsumerRef
+    bandwidth: Bandwidth | None = Field(None, description='为消费者分配的带宽。')
+    compute: Compute | None = Field(None, description='为消费者分配的计算资源。')
+    priority: int | None = Field(None, description='该资源分配记录对应的调度优先级。')
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+
+
+class TrafficResource(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    demands: list[TrafficDemand]
+    flows: list[Flow]
+    allocations: list[ResourceAllocation]
+    aggregate_state: TrafficAggregateState | None = None
+
+
+class Task(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    task_id: str
+    task_type: str = Field(..., description='任务类型，由业务系统定义。')
+    source_node: str
+    destinations: list[str] = Field(..., min_length=1)
+    payload_size: PayloadSize = Field(..., description='任务总负载/数据规模。')
+    submitted_at: ScenarioTime
+    earliest_start: ScenarioTime | None = None
+    deadline: ScenarioTime | None = None
+    priority: TaskPriority
+    requirements: TaskRequirements
+    delivery_mode: DeliveryMode = Field(
+        ...,
+        description='GUARANTEED=强调成功交付，BEST_EFFORT=尽力而为，FIRE_AND_FORGET=源端发出即可。',
+    )
+    completion_criterion: CompletionCriterion = Field(
+        ..., description='任务完成的判定语义。'
+    )
+    can_preempt_others: bool = Field(
+        ..., description='该任务是否允许抢占其他任务资源。'
+    )
+    preemptible: bool = Field(..., description='该任务自身是否允许被其他任务抢占。')
+    state: TaskState
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+    extensions: dict[str, Any] | None = None
+
+
+class NetworkIntent(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    connectivity: Connectivity
+    task_assurance: TaskAssurance
+    resource_efficiency: ResourceEfficiency
+    objective_weights: ObjectiveWeights | None = Field(
+        None, description='可选高层目标权重，可用于条件化世界模型或后续控制研究。'
+    )
+    stamp: ObservationStamp | None = Field(
+        None,
+        description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
+    )
+    extensions: dict[str, Any] | None = None
+
+
 class NetworkWorldState(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -1789,6 +2219,10 @@ class NetworkWorldState(BaseModel):
     scenario_time: ScenarioTime
     delta_time: ScenarioTime | None = Field(
         None, description='与上一 Snapshot 的场景时间间隔。'
+    )
+    time_base: TimeBase | None = Field(
+        None,
+        description='把 scenario_time 锚定到绝对时刻的时间基。缺少它时，ObservationStamp 中的 Instant 与 scenario_time 无法互相换算。',
     )
     physical_world: PhysicalWorld
     nodes: list[Node]
@@ -1804,4 +2238,11 @@ class NetworkWorldState(BaseModel):
         ..., description='与当前快照相关、在该时间窗口内发生的外部主动 Action。'
     )
     derived_metrics: DerivedMetrics | None = Field(None, description='可选派生指标。')
+    availability: Availability | None = Field(
+        None,
+        description='该快照整体的可观测性/覆盖率。partial=true 的快照只能解释为部分状态，不能当作完整网络结论。',
+    )
+    provenance: Provenance | None = Field(
+        None, description='该快照的数据来源与血缘。离线数据必须携带。'
+    )
     extensions: dict[str, Any] | None = Field(None, description='顶层扩展字段。')

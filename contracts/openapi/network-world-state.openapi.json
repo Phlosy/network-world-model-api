@@ -477,6 +477,10 @@
             },
             "additionalProperties": false
           },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
+          },
           "extensions": {
             "type": "object",
             "description": "物理世界的扩展属性。扩展字段不应改变核心 Schema 语义。",
@@ -1021,6 +1025,14 @@
               "$ref": "#/components/schemas/CommunicationTerminalState"
             }
           },
+          "availability": {
+            "$ref": "#/components/schemas/Availability",
+            "description": "该对象动态状态的可观测性。不可观测时不得用默认值填充具体字段，必须在 availability 中显式声明 state=unavailable。"
+          },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
+          },
           "extensions": {
             "type": "object",
             "additionalProperties": true,
@@ -1074,6 +1086,10 @@
           },
           "state": {
             "$ref": "#/components/schemas/NodeState"
+          },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
           },
           "extensions": {
             "type": "object",
@@ -1361,6 +1377,14 @@
           "queue": {
             "$ref": "#/components/schemas/QueueState"
           },
+          "availability": {
+            "$ref": "#/components/schemas/Availability",
+            "description": "该对象动态状态的可观测性。不可观测时不得用默认值填充具体字段，必须在 availability 中显式声明 state=unavailable。"
+          },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
+          },
           "extensions": {
             "type": "object",
             "additionalProperties": true,
@@ -1487,6 +1511,10 @@
             "type": "string",
             "description": "逻辑网络上下文，例如 default、VRF/租户/Overlay 标识。",
             "default": "default"
+          },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
           }
         },
         "required": [
@@ -1546,6 +1574,10 @@
               "GENERIC"
             ],
             "description": "三层逻辑连接类型。"
+          },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
           }
         },
         "required": [
@@ -1670,6 +1702,10 @@
             "$ref": "#/components/schemas/ScenarioTime",
             "nullable": true,
             "description": "可选失效时间。为空表示在当前快照中仍有效。"
+          },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
           }
         },
         "required": [
@@ -1936,6 +1972,10 @@
           },
           "generated_at": {
             "$ref": "#/components/schemas/ScenarioTime"
+          },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
           }
         },
         "required": [
@@ -2174,6 +2214,10 @@
           },
           "state": {
             "$ref": "#/components/schemas/FlowState"
+          },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
           }
         },
         "required": [
@@ -2290,6 +2334,10 @@
             "type": "integer",
             "nullable": true,
             "description": "该资源分配记录对应的调度优先级。"
+          },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
           }
         },
         "required": [
@@ -2803,6 +2851,10 @@
           "state": {
             "$ref": "#/components/schemas/TaskState"
           },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
+          },
           "extensions": {
             "type": "object",
             "additionalProperties": true
@@ -2922,6 +2974,10 @@
               }
             },
             "additionalProperties": false
+          },
+          "stamp": {
+            "$ref": "#/components/schemas/ObservationStamp",
+            "description": "该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。"
           },
           "extensions": {
             "type": "object",
@@ -3196,6 +3252,10 @@
             "nullable": true,
             "description": "与上一 Snapshot 的场景时间间隔。"
           },
+          "time_base": {
+            "$ref": "#/components/schemas/TimeBase",
+            "description": "把 scenario_time 锚定到绝对时刻的时间基。缺少它时，ObservationStamp 中的 Instant 与 scenario_time 无法互相换算。"
+          },
           "physical_world": {
             "$ref": "#/components/schemas/PhysicalWorld"
           },
@@ -3242,6 +3302,14 @@
             "nullable": true,
             "description": "可选派生指标。"
           },
+          "availability": {
+            "$ref": "#/components/schemas/Availability",
+            "description": "该快照整体的可观测性/覆盖率。partial=true 的快照只能解释为部分状态，不能当作完整网络结论。"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance",
+            "description": "该快照的数据来源与血缘。离线数据必须携带。"
+          },
           "extensions": {
             "type": "object",
             "description": "顶层扩展字段。",
@@ -3264,6 +3332,650 @@
           "external_actions"
         ],
         "additionalProperties": false
+      },
+      "Instant": {
+        "type": "object",
+        "description": "绝对时刻 + 时间尺度，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Instant，语义保持一致。 value 是不带时区后缀的扩展 ISO-8601，scale 单独决定时间尺度。 世界模型自身的内部时间轴仍是 scenario_time；Instant 只用于把观测锚定到外部系统的绝对时间，二者通过 TimeBase 换算。",
+        "properties": {
+          "value": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:([0-5][0-9]|60)(\\.[0-9]+)?$",
+            "description": "不带时区后缀的扩展 ISO-8601 时刻 YYYY-MM-DDThh:mm:ss[.fraction]；秒值 60 只允许用于经版本化 leap-second 数据验证后的 UTC。",
+            "example": "2026-01-01T00:00:00"
+          },
+          "scale": {
+            "type": "string",
+            "enum": [
+              "UTC",
+              "TAI",
+              "TT",
+              "TDB"
+            ],
+            "x-enum-varnames": [
+              "TimeScaleUTC",
+              "TimeScaleTAI",
+              "TimeScaleTT",
+              "TimeScaleTDB"
+            ],
+            "description": "时间尺度。UTC=协调世界时；TAI=国际原子时；TT=地球时；TDB=太阳系质心力学时。没有 scale 的时刻无法被独立解释。"
+          }
+        },
+        "required": [
+          "value",
+          "scale"
+        ],
+        "additionalProperties": false
+      },
+      "TimeBase": {
+        "type": "object",
+        "description": "把世界模型的内部时间轴（scenario_time，相对秒）锚定到外部系统的绝对时刻。该绑定在一个场景内唯一且不变，否则 ObservationStamp 中的 Instant 无法与scenario_time 互相换算。缺少该绑定的快照不能声称自己能独立解释观测时刻。",
+        "properties": {
+          "scenario_epoch": {
+            "$ref": "#/components/schemas/Instant",
+            "description": "scenario_time = 0 所对应的绝对时刻。"
+          },
+          "simulation_start": {
+            "$ref": "#/components/schemas/Instant",
+            "description": "仿真真正开始推进的绝对时刻。通常与 scenario_epoch 相同；外部系统在正式推进前预置初始状态时二者可以不同。"
+          },
+          "tick_s": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "description": "逻辑仿真 tick 长度，单位为秒。用于表达观测的最细时间粒度，也是时序对齐 binning 窗口的下界。"
+          }
+        },
+        "required": [
+          "scenario_epoch",
+          "simulation_start"
+        ],
+        "additionalProperties": false
+      },
+      "ObservationStamp": {
+        "type": "object",
+        "description": "一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。",
+        "properties": {
+          "observed_at_instant": {
+            "$ref": "#/components/schemas/Instant",
+            "description": "源系统报告该值产生的绝对时刻。"
+          },
+          "observed_at_scenario_time": {
+            "$ref": "#/components/schemas/ScenarioTime",
+            "description": "该值对齐到世界模型时间轴后的时刻。"
+          },
+          "valid_from": {
+            "$ref": "#/components/schemas/ScenarioTime",
+            "description": "该值开始适用的场景时刻。"
+          },
+          "valid_until": {
+            "$ref": "#/components/schemas/ScenarioTime",
+            "description": "该值不再适用的场景时刻（不含）；省略表示一直有效。"
+          },
+          "source_system": {
+            "type": "string",
+            "minLength": 1,
+            "description": "产生该观测的外部系统名称。"
+          },
+          "source_record_id": {
+            "type": "string",
+            "description": "源系统内部的记录标识，不要求全局唯一。"
+          },
+          "sampling": {
+            "type": "string",
+            "enum": [
+              "Exact",
+              "Previous",
+              "Nearest"
+            ],
+            "x-enum-varnames": [
+              "SamplingExact",
+              "SamplingPrevious",
+              "SamplingNearest"
+            ],
+            "description": "该观测相对请求时刻的采样策略。Replay 场景必须显式声明，不允许由 adapter 自行选择，否则回放结果不可复现。"
+          }
+        },
+        "required": [
+          "source_system"
+        ],
+        "additionalProperties": false
+      },
+      "Provenance": {
+        "type": "object",
+        "description": "该快照的数据来源。数据血缘必须能从快照本身读出，不能依赖外部记录；否则异步数据源的对齐结果无法审计，数据集也无法精确复现。",
+        "properties": {
+          "source_system": {
+            "type": "string",
+            "minLength": 1,
+            "description": "产生原始数据的外部系统名称。"
+          },
+          "source_record_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "参与该快照的原始记录标识。"
+          },
+          "adapter": {
+            "type": "string",
+            "description": "执行映射的 adapter 名称。"
+          },
+          "adapter_version": {
+            "type": "string",
+            "description": "映射规范（mapping spec）的名称与版本；用于精确复现数据集。"
+          },
+          "simulation_run_id": {
+            "type": "string",
+            "description": "外部仿真系统的运行标识。"
+          },
+          "raw_source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "原始文件或流的引用（路径、URI 或对象名）。"
+          },
+          "imported_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "导入发生的墙上时钟时间；仅用于审计，不参与任何计算。"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_system"
+        ],
+        "additionalProperties": false
+      },
+      "Availability": {
+        "type": "object",
+        "description": "某一个量或某一个实体的可观测性。这是本契约的一等语义：不可观测不得用 0、默认值或缺失字段表示，否则世界模型会把「没有观测」训练成真实值（例如把未采集的 CPU 利用率学成 0）。对应外部系统的 coverage / partial / unknown 语义；partial 既不代表失败，也不代表缺失值为 0。",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "observed",
+              "derived",
+              "unavailable",
+              "unknown"
+            ],
+            "x-enum-varnames": [
+              "AvailabilityObserved",
+              "AvailabilityDerived",
+              "AvailabilityUnavailable",
+              "AvailabilityUnknown"
+            ],
+            "description": "observed=直接观测到；derived=由其他观测计算得到；unavailable=当前条件下不可观测；unknown=来源未声明。"
+          },
+          "coverage_ratio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "该量在聚合范围内的覆盖率；1 表示完整覆盖。"
+          },
+          "partial": {
+            "type": "boolean",
+            "description": "true 表示结果基于部分可见数据得出，只能解释为部分统计，不能当作完整结论。"
+          },
+          "reason": {
+            "type": "string",
+            "description": "unavailable / unknown / partial 的原因标识，便于消费方区分「源不支持该量」与「暂时不可达」。"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "Vec3": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "format": "double"
+        },
+        "minItems": 3,
+        "maxItems": 3,
+        "description": "三维向量 [x, y, z]，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Vec3，语义保持一致。 单位由引用它的字段名声明显式声明（例如 _m、_m_s、_rad_s），不得依赖调用方推测。"
+      },
+      "QuaternionXYZW": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "format": "double"
+        },
+        "minItems": 4,
+        "maxItems": 4,
+        "description": "单位四元数 [x, y, z, w]（标量在最后），vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 QuaternionXYZW，语义保持一致。 表示从字段名所指 source frame 到 target frame 的主动旋转；分量顺序固定为 XYZW，禁止使用 wxyz 顺序。"
+      },
+      "NamedFrameRef": {
+        "type": "object",
+        "description": "对场景声明的命名参考系的引用。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NamedFrame"
+            ],
+            "x-enum-varnames": [
+              "FrameKindNamedFrame"
+            ],
+            "description": "引用种类判别字段。"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "场景内稳定的命名参考系标识；同一场景内唯一，且不得使用显示名。"
+          }
+        },
+        "required": [
+          "type",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "NodeBodyFrameRef": {
+        "type": "object",
+        "description": "对某个场景实体机体系的引用。使用被引用实体在同一时刻的姿态；引用产生的姿态依赖参与位姿依赖图，不允许用上一 tick 的姿态打破环。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NodeBodyFrame"
+            ],
+            "x-enum-varnames": [
+              "FrameKindNodeBodyFrame"
+            ],
+            "description": "引用种类判别字段。"
+          },
+          "node": {
+            "type": "string",
+            "minLength": 1,
+            "description": "场景实体的稳定名称。"
+          }
+        },
+        "required": [
+          "type",
+          "node"
+        ],
+        "additionalProperties": false
+      },
+      "FrameRef": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/NamedFrameRef"
+          },
+          {
+            "$ref": "#/components/schemas/NodeBodyFrameRef"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "NamedFrame": "#/components/schemas/NamedFrameRef",
+            "NodeBodyFrame": "#/components/schemas/NodeBodyFrameRef"
+          }
+        },
+        "description": "参考系引用：命名参考系或场景实体机体系，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameRef，语义保持一致。 任何坐标都必须能通过 FrameRef 独立解释；不得从字段名、实体名或调用方类型猜测参考系。"
+      },
+      "IdentityFrameTransform": {
+        "type": "object",
+        "description": "恒等变换：子参考系与父参考系同向同原点。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Identity"
+            ],
+            "x-enum-varnames": [
+              "FrameTransformIdentity"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "additionalProperties": false
+      },
+      "FixedFrameTransform": {
+        "type": "object",
+        "description": "固定刚体变换：子参考系相对父参考系为常量平移与旋转。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Fixed"
+            ],
+            "x-enum-varnames": [
+              "FrameTransformFixed"
+            ]
+          },
+          "translation_parent_m": {
+            "$ref": "#/components/schemas/Vec3",
+            "description": "子参考系原点在父参考系中的位置，单位为米。"
+          },
+          "rotation_child_to_parent_xyzw": {
+            "$ref": "#/components/schemas/QuaternionXYZW",
+            "description": "子参考系到父参考系的主动旋转。"
+          }
+        },
+        "required": [
+          "type",
+          "translation_parent_m",
+          "rotation_child_to_parent_xyzw"
+        ],
+        "additionalProperties": false
+      },
+      "UniformRotationFrameTransform": {
+        "type": "object",
+        "description": "匀速旋转变换：子参考系相对父参考系绕固定轴匀速旋转。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "UniformRotation"
+            ],
+            "x-enum-varnames": [
+              "FrameTransformUniformRotation"
+            ]
+          },
+          "epoch": {
+            "$ref": "#/components/schemas/Instant",
+            "description": "相位锚定的历元。"
+          },
+          "origin_parent_m": {
+            "$ref": "#/components/schemas/Vec3",
+            "description": "子参考系原点在父参考系中的位置，单位为米。"
+          },
+          "axis_parent": {
+            "$ref": "#/components/schemas/Vec3",
+            "description": "父参考系中的旋转轴；必须为有限非零向量。"
+          },
+          "rate_rad_s": {
+            "type": "number",
+            "format": "double",
+            "description": "角速度，单位为 rad/s。"
+          },
+          "phase_at_epoch_rad": {
+            "type": "number",
+            "format": "double",
+            "description": "历元时绕旋转轴的相位，单位为 rad。"
+          }
+        },
+        "required": [
+          "type",
+          "epoch",
+          "origin_parent_m",
+          "axis_parent",
+          "rate_rad_s",
+          "phase_at_epoch_rad"
+        ],
+        "additionalProperties": false
+      },
+      "EphemerisFrameTransform": {
+        "type": "object",
+        "description": "星历变换：参考系变换由版本化 provider 按时刻求值。provider 缺失、超出覆盖范围或输出非有限值时必须整体失败，不得回退到上一帧。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Ephemeris"
+            ],
+            "x-enum-varnames": [
+              "FrameTransformEphemeris"
+            ]
+          },
+          "provider": {
+            "type": "string",
+            "minLength": 1,
+            "description": "版本化空间 provider 的名称。"
+          },
+          "observer": {
+            "type": "string",
+            "description": "观察者标识。"
+          },
+          "target": {
+            "type": "string",
+            "description": "目标标识。"
+          },
+          "orientation": {
+            "type": "string",
+            "description": "姿态表达约定。"
+          },
+          "derivative_order": {
+            "type": "string",
+            "description": "导数阶数约定。"
+          }
+        },
+        "required": [
+          "type",
+          "provider",
+          "observer",
+          "target",
+          "derivative_order"
+        ],
+        "additionalProperties": false
+      },
+      "FrameTransform": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/IdentityFrameTransform"
+          },
+          {
+            "$ref": "#/components/schemas/FixedFrameTransform"
+          },
+          {
+            "$ref": "#/components/schemas/UniformRotationFrameTransform"
+          },
+          {
+            "$ref": "#/components/schemas/EphemerisFrameTransform"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Identity": "#/components/schemas/IdentityFrameTransform",
+            "Fixed": "#/components/schemas/FixedFrameTransform",
+            "UniformRotation": "#/components/schemas/UniformRotationFrameTransform",
+            "Ephemeris": "#/components/schemas/EphemerisFrameTransform"
+          }
+        },
+        "description": "参考系变换链上的一环，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameTransform，语义保持一致。"
+      },
+      "ReferenceFrame": {
+        "type": "object",
+        "description": "场景声明的命名参考系，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 ReferenceFrame，语义保持一致。 parent 与 transform 共同把它连到父参考系；根参考系省略 parent。帧目录内容变化必须体现为帧目录版本变化。",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "场景内稳定的命名参考系标识；同一场景内唯一，且不得使用显示名。"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/NamedFrameRef",
+            "description": "父参考系；省略表示这是根参考系。"
+          },
+          "transform": {
+            "$ref": "#/components/schemas/FrameTransform"
+          }
+        },
+        "required": [
+          "name",
+          "transform"
+        ],
+        "additionalProperties": false
+      },
+      "SphereBodyShape": {
+        "type": "object",
+        "description": "球形天体形状。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Sphere"
+            ],
+            "x-enum-varnames": [
+              "BodyShapeSphere"
+            ]
+          },
+          "radius_m": {
+            "type": "number",
+            "format": "double",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "description": "球半径，单位为米。"
+          }
+        },
+        "required": [
+          "type",
+          "radius_m"
+        ],
+        "additionalProperties": false
+      },
+      "OblateEllipsoidBodyShape": {
+        "type": "object",
+        "description": "扁椭球天体形状，用于表达 WGS84 之类的参考椭球。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "OblateEllipsoid"
+            ],
+            "x-enum-varnames": [
+              "BodyShapeOblateEllipsoid"
+            ]
+          },
+          "semi_major_axis_m": {
+            "type": "number",
+            "format": "double",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "description": "长半轴，单位为米。"
+          },
+          "inverse_flattening": {
+            "type": "number",
+            "format": "double",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "description": "扁率倒数 1/f。"
+          }
+        },
+        "required": [
+          "type",
+          "semi_major_axis_m",
+          "inverse_flattening"
+        ],
+        "additionalProperties": false
+      },
+      "BodyShape": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/SphereBodyShape"
+          },
+          {
+            "$ref": "#/components/schemas/OblateEllipsoidBodyShape"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Sphere": "#/components/schemas/SphereBodyShape",
+            "OblateEllipsoid": "#/components/schemas/OblateEllipsoidBodyShape"
+          }
+        },
+        "description": "天体形状。它同时是大地坐标的 datum：没有 shape 就无法解释经纬高。"
+      },
+      "EnvironmentBody": {
+        "type": "object",
+        "description": "环境天体：解释大地坐标所需的环境天体投影，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 EnvironmentBody，语义保持一致。 这是受限投影：只保留解释位置所需字段，gravity 与 atmosphere 由 Config 契约拥有，不在本契约重复定义（省略说明见 contracts/vendoring.yaml）。",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "场景内稳定的环境天体标识；同一场景内唯一。"
+          },
+          "shape": {
+            "$ref": "#/components/schemas/BodyShape"
+          },
+          "inertial_frame": {
+            "$ref": "#/components/schemas/FrameRef",
+            "description": "该天体的惯性参考系。"
+          },
+          "fixed_frame": {
+            "$ref": "#/components/schemas/FrameRef",
+            "description": "该天体的固连参考系；大地坐标只允许与该帧组合。"
+          }
+        },
+        "required": [
+          "name",
+          "shape",
+          "inertial_frame",
+          "fixed_frame"
+        ],
+        "additionalProperties": false
+      },
+      "CartesianObservationFormat": {
+        "type": "object",
+        "description": "笛卡尔位置格式：数值在 resolved_frame 轴中表达。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Cartesian"
+            ],
+            "x-enum-varnames": [
+              "PositionFormatCartesian"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "additionalProperties": false
+      },
+      "GeodeticObservationFormat": {
+        "type": "object",
+        "description": "大地位置格式：必须声明环境天体，datum 由该天体的 shape 解析。大地坐标只允许与该天体的固定参考系组合；不得在惯性系或机体系上返回大地坐标。",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Geodetic"
+            ],
+            "x-enum-varnames": [
+              "PositionFormatGeodetic"
+            ]
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "description": "场景内稳定的环境天体标识；同一场景内唯一。"
+          }
+        },
+        "required": [
+          "type",
+          "body"
+        ],
+        "additionalProperties": false
+      },
+      "ObservationPositionFormat": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CartesianObservationFormat"
+          },
+          {
+            "$ref": "#/components/schemas/GeodeticObservationFormat"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Cartesian": "#/components/schemas/CartesianObservationFormat",
+            "Geodetic": "#/components/schemas/GeodeticObservationFormat"
+          }
+        },
+        "description": "位置表达格式，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 ObservationPositionFormat，语义保持一致。 消费方必须按 response 中解析后的格式解释数值，不得把任意笛卡尔坐标自动当作地球固连坐标。"
       }
     }
   },

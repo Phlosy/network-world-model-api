@@ -5,8 +5,51 @@ package worldstate
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"time"
+
+	"github.com/oapi-codegen/runtime"
 )
+
+// Defines values for AvailabilityState.
+const (
+	AvailabilityDerived     AvailabilityState = "derived"
+	AvailabilityObserved    AvailabilityState = "observed"
+	AvailabilityUnavailable AvailabilityState = "unavailable"
+	AvailabilityUnknown     AvailabilityState = "unknown"
+)
+
+// Valid indicates whether the value is a known member of the AvailabilityState enum.
+func (e AvailabilityState) Valid() bool {
+	switch e {
+	case AvailabilityDerived:
+		return true
+	case AvailabilityObserved:
+		return true
+	case AvailabilityUnavailable:
+		return true
+	case AvailabilityUnknown:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CartesianObservationFormatType.
+const (
+	PositionFormatCartesian CartesianObservationFormatType = "Cartesian"
+)
+
+// Valid indicates whether the value is a known member of the CartesianObservationFormatType enum.
+func (e CartesianObservationFormatType) Valid() bool {
+	switch e {
+	case PositionFormatCartesian:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for CommunicationTerminalCapabilityDuplex.
 const (
@@ -122,6 +165,21 @@ func (e DestinationType) Valid() bool {
 	}
 }
 
+// Defines values for EphemerisFrameTransformType.
+const (
+	FrameTransformEphemeris EphemerisFrameTransformType = "Ephemeris"
+)
+
+// Valid indicates whether the value is a known member of the EphemerisFrameTransformType enum.
+func (e EphemerisFrameTransformType) Valid() bool {
+	switch e {
+	case FrameTransformEphemeris:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ExternalActionActionType.
 const (
 	ExternalActionActionTypeENVIRONMENTCHANGE ExternalActionActionType = "ENVIRONMENT_CHANGE"
@@ -155,6 +213,21 @@ func (e ExternalActionActionType) Valid() bool {
 	case ExternalActionActionTypeTASKMODIFY:
 		return true
 	case ExternalActionActionTypeTASKSUBMIT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FixedFrameTransformType.
+const (
+	FrameTransformFixed FixedFrameTransformType = "Fixed"
+)
+
+// Valid indicates whether the value is a known member of the FixedFrameTransformType enum.
+func (e FixedFrameTransformType) Valid() bool {
+	switch e {
+	case FrameTransformFixed:
 		return true
 	default:
 		return false
@@ -212,6 +285,21 @@ func (e FlowStateStatus) Valid() bool {
 	}
 }
 
+// Defines values for GeodeticObservationFormatType.
+const (
+	PositionFormatGeodetic GeodeticObservationFormatType = "Geodetic"
+)
+
+// Valid indicates whether the value is a known member of the GeodeticObservationFormatType enum.
+func (e GeodeticObservationFormatType) Valid() bool {
+	switch e {
+	case PositionFormatGeodetic:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for IPAddressFamily.
 const (
 	IPV4 IPAddressFamily = "IPV4"
@@ -224,6 +312,45 @@ func (e IPAddressFamily) Valid() bool {
 	case IPV4:
 		return true
 	case IPV6:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for IdentityFrameTransformType.
+const (
+	FrameTransformIdentity IdentityFrameTransformType = "Identity"
+)
+
+// Valid indicates whether the value is a known member of the IdentityFrameTransformType enum.
+func (e IdentityFrameTransformType) Valid() bool {
+	switch e {
+	case FrameTransformIdentity:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for InstantScale.
+const (
+	TimeScaleTAI InstantScale = "TAI"
+	TimeScaleTDB InstantScale = "TDB"
+	TimeScaleTT  InstantScale = "TT"
+	TimeScaleUTC InstantScale = "UTC"
+)
+
+// Valid indicates whether the value is a known member of the InstantScale enum.
+func (e InstantScale) Valid() bool {
+	switch e {
+	case TimeScaleTAI:
+		return true
+	case TimeScaleTDB:
+		return true
+	case TimeScaleTT:
+		return true
+	case TimeScaleUTC:
 		return true
 	default:
 		return false
@@ -359,6 +486,21 @@ func (e L3PathDerived) Valid() bool {
 	}
 }
 
+// Defines values for NamedFrameRefType.
+const (
+	FrameKindNamedFrame NamedFrameRefType = "NamedFrame"
+)
+
+// Valid indicates whether the value is a known member of the NamedFrameRefType enum.
+func (e NamedFrameRefType) Valid() bool {
+	switch e {
+	case FrameKindNamedFrame:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for NodeNodeType.
 const (
 	NodeNodeTypeAIRCRAFT      NodeNodeType = "AIRCRAFT"
@@ -398,6 +540,57 @@ func (e NodeNodeType) Valid() bool {
 	case NodeNodeTypeUAV:
 		return true
 	case NodeNodeTypeVEHICLE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for NodeBodyFrameRefType.
+const (
+	FrameKindNodeBodyFrame NodeBodyFrameRefType = "NodeBodyFrame"
+)
+
+// Valid indicates whether the value is a known member of the NodeBodyFrameRefType enum.
+func (e NodeBodyFrameRefType) Valid() bool {
+	switch e {
+	case FrameKindNodeBodyFrame:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for OblateEllipsoidBodyShapeType.
+const (
+	BodyShapeOblateEllipsoid OblateEllipsoidBodyShapeType = "OblateEllipsoid"
+)
+
+// Valid indicates whether the value is a known member of the OblateEllipsoidBodyShapeType enum.
+func (e OblateEllipsoidBodyShapeType) Valid() bool {
+	switch e {
+	case BodyShapeOblateEllipsoid:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ObservationStampSampling.
+const (
+	SamplingExact    ObservationStampSampling = "Exact"
+	SamplingNearest  ObservationStampSampling = "Nearest"
+	SamplingPrevious ObservationStampSampling = "Previous"
+)
+
+// Valid indicates whether the value is a known member of the ObservationStampSampling enum.
+func (e ObservationStampSampling) Valid() bool {
+	switch e {
+	case SamplingExact:
+		return true
+	case SamplingNearest:
+		return true
+	case SamplingPrevious:
 		return true
 	default:
 		return false
@@ -500,6 +693,21 @@ const (
 func (e SchemaMetadataName) Valid() bool {
 	switch e {
 	case SchemaMetadataNameNetworkWorldState:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SphereBodyShapeType.
+const (
+	BodyShapeSphere SphereBodyShapeType = "Sphere"
+)
+
+// Valid indicates whether the value is a known member of the SphereBodyShapeType enum.
+func (e SphereBodyShapeType) Valid() bool {
+	switch e {
+	case BodyShapeSphere:
 		return true
 	default:
 		return false
@@ -680,6 +888,21 @@ func (e TaskStateStatus) Valid() bool {
 	}
 }
 
+// Defines values for UniformRotationFrameTransformType.
+const (
+	FrameTransformUniformRotation UniformRotationFrameTransformType = "UniformRotation"
+)
+
+// Valid indicates whether the value is a known member of the UniformRotationFrameTransformType enum.
+func (e UniformRotationFrameTransformType) Valid() bool {
+	switch e {
+	case FrameTransformUniformRotation:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for WorldEventEventType.
 const (
 	WorldEventEventTypeENVIRONMENTCHANGE WorldEventEventType = "ENVIRONMENT_CHANGE"
@@ -709,6 +932,37 @@ func (e WorldEventEventType) Valid() bool {
 		return false
 	}
 }
+
+// Availability 某一个量或某一个实体的可观测性。这是本契约的一等语义：不可观测不得用 0、默认值或缺失字段表示，否则世界模型会把「没有观测」训练成真实值（例如把未采集的 CPU 利用率学成 0）。对应外部系统的 coverage / partial / unknown 语义；partial 既不代表失败，也不代表缺失值为 0。
+type Availability struct {
+	// CoverageRatio 该量在聚合范围内的覆盖率；1 表示完整覆盖。
+	CoverageRatio *float32 `json:"coverage_ratio,omitempty"`
+
+	// Partial true 表示结果基于部分可见数据得出，只能解释为部分统计，不能当作完整结论。
+	Partial *bool `json:"partial,omitempty"`
+
+	// Reason unavailable / unknown / partial 的原因标识，便于消费方区分「源不支持该量」与「暂时不可达」。
+	Reason *string `json:"reason,omitempty"`
+
+	// State observed=直接观测到；derived=由其他观测计算得到；unavailable=当前条件下不可观测；unknown=来源未声明。
+	State AvailabilityState `json:"state"`
+}
+
+// AvailabilityState observed=直接观测到；derived=由其他观测计算得到；unavailable=当前条件下不可观测；unknown=来源未声明。
+type AvailabilityState string
+
+// BodyShape 天体形状。它同时是大地坐标的 datum：没有 shape 就无法解释经纬高。
+type BodyShape struct {
+	union json.RawMessage
+}
+
+// CartesianObservationFormat 笛卡尔位置格式：数值在 resolved_frame 轴中表达。
+type CartesianObservationFormat struct {
+	Type CartesianObservationFormatType `json:"type"`
+}
+
+// CartesianObservationFormatType defines model for CartesianObservationFormat.Type.
+type CartesianObservationFormatType string
 
 // CommunicationTerminalCapability 节点通信终端的能力描述。Laser、RF、Microwave、Ethernet、Optical 等统一使用该抽象。终端能力描述“能做什么”，当前工作状态放在 CommunicationTerminalState。
 type CommunicationTerminalCapability struct {
@@ -934,6 +1188,43 @@ type Destination struct {
 // DestinationType 目的对象类型。
 type DestinationType string
 
+// EnvironmentBody 环境天体：解释大地坐标所需的环境天体投影，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 EnvironmentBody，语义保持一致。 这是受限投影：只保留解释位置所需字段，gravity 与 atmosphere 由 Config 契约拥有，不在本契约重复定义（省略说明见 contracts/vendoring.yaml）。
+type EnvironmentBody struct {
+	// FixedFrame 参考系引用：命名参考系或场景实体机体系，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameRef，语义保持一致。 任何坐标都必须能通过 FrameRef 独立解释；不得从字段名、实体名或调用方类型猜测参考系。
+	FixedFrame FrameRef `json:"fixed_frame"`
+
+	// InertialFrame 参考系引用：命名参考系或场景实体机体系，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameRef，语义保持一致。 任何坐标都必须能通过 FrameRef 独立解释；不得从字段名、实体名或调用方类型猜测参考系。
+	InertialFrame FrameRef `json:"inertial_frame"`
+
+	// Name 场景内稳定的环境天体标识；同一场景内唯一。
+	Name string `json:"name"`
+
+	// Shape 天体形状。它同时是大地坐标的 datum：没有 shape 就无法解释经纬高。
+	Shape BodyShape `json:"shape"`
+}
+
+// EphemerisFrameTransform 星历变换：参考系变换由版本化 provider 按时刻求值。provider 缺失、超出覆盖范围或输出非有限值时必须整体失败，不得回退到上一帧。
+type EphemerisFrameTransform struct {
+	// DerivativeOrder 导数阶数约定。
+	DerivativeOrder string `json:"derivative_order"`
+
+	// Observer 观察者标识。
+	Observer string `json:"observer"`
+
+	// Orientation 姿态表达约定。
+	Orientation *string `json:"orientation,omitempty"`
+
+	// Provider 版本化空间 provider 的名称。
+	Provider string `json:"provider"`
+
+	// Target 目标标识。
+	Target string                      `json:"target"`
+	Type   EphemerisFrameTransformType `json:"type"`
+}
+
+// EphemerisFrameTransformType defines model for EphemerisFrameTransform.Type.
+type EphemerisFrameTransformType string
+
 // ExternalAction 从 Network World Model 系统边界之外主动施加的干预。一次 Action 发生后，其影响应反映在后续 World State 中。
 type ExternalAction struct {
 	ActionId string `json:"action_id"`
@@ -952,6 +1243,19 @@ type ExternalAction struct {
 // ExternalActionActionType 外部主动干预类型。
 type ExternalActionActionType string
 
+// FixedFrameTransform 固定刚体变换：子参考系相对父参考系为常量平移与旋转。
+type FixedFrameTransform struct {
+	// RotationChildToParentXyzw 单位四元数 [x, y, z, w]（标量在最后），vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 QuaternionXYZW，语义保持一致。 表示从字段名所指 source frame 到 target frame 的主动旋转；分量顺序固定为 XYZW，禁止使用 wxyz 顺序。
+	RotationChildToParentXyzw QuaternionXYZW `json:"rotation_child_to_parent_xyzw"`
+
+	// TranslationParentM 三维向量 [x, y, z]，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Vec3，语义保持一致。 单位由引用它的字段名声明显式声明（例如 _m、_m_s、_rad_s），不得依赖调用方推测。
+	TranslationParentM Vec3                    `json:"translation_parent_m"`
+	Type               FixedFrameTransformType `json:"type"`
+}
+
+// FixedFrameTransformType defines model for FixedFrameTransform.Type.
+type FixedFrameTransformType string
+
 // Flow 由 Traffic Demand 实际形成的网络传输流。
 type Flow struct {
 	DemandId        *string `json:"demand_id,omitempty"`
@@ -961,6 +1265,9 @@ type Flow struct {
 	// PathId 可选引用当前派生 Path。
 	PathId     *string `json:"path_id,omitempty"`
 	SourceNode string  `json:"source_node"`
+
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
 
 	// State 实际网络流在当前 scenario_time 下的状态。
 	State  FlowState `json:"state"`
@@ -1070,12 +1377,35 @@ type ForwardingEntry struct {
 	// NodeId 执行该转发决策的节点。
 	NodeId string `json:"node_id"`
 
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
+
 	// ValidFrom 场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。
 	ValidFrom ScenarioTime `json:"valid_from"`
 
 	// ValidUntil 场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。
 	ValidUntil *ScenarioTime `json:"valid_until,omitempty"`
 }
+
+// FrameRef 参考系引用：命名参考系或场景实体机体系，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameRef，语义保持一致。 任何坐标都必须能通过 FrameRef 独立解释；不得从字段名、实体名或调用方类型猜测参考系。
+type FrameRef struct {
+	union json.RawMessage
+}
+
+// FrameTransform 参考系变换链上的一环，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameTransform，语义保持一致。
+type FrameTransform struct {
+	union json.RawMessage
+}
+
+// GeodeticObservationFormat 大地位置格式：必须声明环境天体，datum 由该天体的 shape 解析。大地坐标只允许与该天体的固定参考系组合；不得在惯性系或机体系上返回大地坐标。
+type GeodeticObservationFormat struct {
+	// Body 场景内稳定的环境天体标识；同一场景内唯一。
+	Body string                        `json:"body"`
+	Type GeodeticObservationFormatType `json:"type"`
+}
+
+// GeodeticObservationFormatType defines model for GeodeticObservationFormat.Type.
+type GeodeticObservationFormatType string
 
 // IPAddress L3 地址信息。
 type IPAddress struct {
@@ -1095,6 +1425,26 @@ type IPAddress struct {
 // IPAddressFamily 地址族。
 type IPAddressFamily string
 
+// IdentityFrameTransform 恒等变换：子参考系与父参考系同向同原点。
+type IdentityFrameTransform struct {
+	Type IdentityFrameTransformType `json:"type"`
+}
+
+// IdentityFrameTransformType defines model for IdentityFrameTransform.Type.
+type IdentityFrameTransformType string
+
+// Instant 绝对时刻 + 时间尺度，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Instant，语义保持一致。 value 是不带时区后缀的扩展 ISO-8601，scale 单独决定时间尺度。 世界模型自身的内部时间轴仍是 scenario_time；Instant 只用于把观测锚定到外部系统的绝对时间，二者通过 TimeBase 换算。
+type Instant struct {
+	// Scale 时间尺度。UTC=协调世界时；TAI=国际原子时；TT=地球时；TDB=太阳系质心力学时。没有 scale 的时刻无法被独立解释。
+	Scale InstantScale `json:"scale"`
+
+	// Value 不带时区后缀的扩展 ISO-8601 时刻 YYYY-MM-DDThh:mm:ss[.fraction]；秒值 60 只允许用于经版本化 leap-second 数据验证后的 UTC。
+	Value string `json:"value"`
+}
+
+// InstantScale 时间尺度。UTC=协调世界时；TAI=国际原子时；TT=地球时；TDB=太阳系质心力学时。没有 scale 的时刻无法被独立解释。
+type InstantScale string
+
 // L2Endpoint L2 Link 的端点。必须同时指向 Node 和该 Node 上的通信终端。
 type L2Endpoint struct {
 	// NodeId 引用 nodes[].node_id。
@@ -1106,6 +1456,9 @@ type L2Endpoint struct {
 
 // L2Link 两个通信终端之间当前存在的二层/通信层连接状态。星间、星地、地面、空地等统一建模。
 type L2Link struct {
+	// Availability 某一个量或某一个实体的可观测性。这是本契约的一等语义：不可观测不得用 0、默认值或缺失字段表示，否则世界模型会把「没有观测」训练成真实值（例如把未采集的 CPU 利用率学成 0）。对应外部系统的 coverage / partial / unknown 语义；partial 既不代表失败，也不代表缺失值为 0。
+	Availability *Availability `json:"availability,omitempty"`
+
 	// AvailableBandwidth 当前可用带宽。
 	AvailableBandwidth struct {
 		// Unit 物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。
@@ -1184,6 +1537,9 @@ type L2Link struct {
 	// Queue 链路或接口上的队列状态。第一阶段可只采集可获得的聚合队列指标。
 	Queue *QueueState `json:"queue,omitempty"`
 
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
+
 	// Status 链路当前运行状态。
 	Status L2LinkStatus `json:"status"`
 
@@ -1251,6 +1607,9 @@ type L3Interface struct {
 	// NodeId 所属节点 ID。
 	NodeId string `json:"node_id"`
 
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
+
 	// TerminalId 可选关联的 L2/通信终端 ID。
 	TerminalId *string `json:"terminal_id,omitempty"`
 }
@@ -1272,6 +1631,9 @@ type L3LogicalLink struct {
 
 	// Operational 逻辑链路当前是否有效。
 	Operational bool `json:"operational"`
+
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
 
 	// Type 三层逻辑连接类型。
 	Type L3LogicalLinkType `json:"type"`
@@ -1309,6 +1671,18 @@ type L3Path struct {
 
 // L3PathDerived defines model for L3Path.Derived.
 type L3PathDerived bool
+
+// NamedFrameRef 对场景声明的命名参考系的引用。
+type NamedFrameRef struct {
+	// Name 场景内稳定的命名参考系标识；同一场景内唯一，且不得使用显示名。
+	Name string `json:"name"`
+
+	// Type 引用种类判别字段。
+	Type NamedFrameRefType `json:"type"`
+}
+
+// NamedFrameRefType 引用种类判别字段。
+type NamedFrameRefType string
 
 // NetworkDerivedMetrics 由基础状态计算得到、用于训练辅助任务、评估和可视化的网络级指标。
 type NetworkDerivedMetrics struct {
@@ -1352,6 +1726,9 @@ type NetworkIntent struct {
 		Enabled         bool `json:"enabled"`
 		LoadBalance     bool `json:"load_balance"`
 	} `json:"resource_efficiency"`
+
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp         *ObservationStamp `json:"stamp,omitempty"`
 	TaskAssurance struct {
 		Enabled           bool `json:"enabled"`
 		PreemptionAllowed bool `json:"preemption_allowed"`
@@ -1362,6 +1739,9 @@ type NetworkIntent struct {
 
 // NetworkWorldState Network World State v0.1 的顶层快照对象。它表示某一个唯一 scenario_time 下，物理环境、节点、L2、L3、流量/资源、任务和网络意图的完整状态。
 type NetworkWorldState struct {
+	// Availability 某一个量或某一个实体的可观测性。这是本契约的一等语义：不可观测不得用 0、默认值或缺失字段表示，否则世界模型会把「没有观测」训练成真实值（例如把未采集的 CPU 利用率学成 0）。对应外部系统的 coverage / partial / unknown 语义；partial 既不代表失败，也不代表缺失值为 0。
+	Availability *Availability `json:"availability,omitempty"`
+
 	// DeltaTime 场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。
 	DeltaTime *ScenarioTime `json:"delta_time,omitempty"`
 
@@ -1390,6 +1770,9 @@ type NetworkWorldState struct {
 	// PhysicalWorld 节点之外客观存在的物理环境。用于描述空间、地理、大气、电磁、干扰及传播环境。节点的位置、速度、姿态等属于 Node State。
 	PhysicalWorld PhysicalWorld `json:"physical_world"`
 
+	// Provenance 该快照的数据来源。数据血缘必须能从快照本身读出，不能依赖外部记录；否则异步数据源的对齐结果无法审计，数据集也无法精确复现。
+	Provenance *Provenance `json:"provenance,omitempty"`
+
 	// ScenarioTime 场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。
 	ScenarioTime ScenarioTime `json:"scenario_time"`
 
@@ -1397,8 +1780,11 @@ type NetworkWorldState struct {
 	Schema SchemaMetadata `json:"schema"`
 
 	// SnapshotId 当前 World Snapshot 唯一标识。
-	SnapshotId      string          `json:"snapshot_id"`
-	Tasks           []Task          `json:"tasks"`
+	SnapshotId string `json:"snapshot_id"`
+	Tasks      []Task `json:"tasks"`
+
+	// TimeBase 把世界模型的内部时间轴（scenario_time，相对秒）锚定到外部系统的绝对时刻。该绑定在一个场景内唯一且不变，否则 ObservationStamp 中的 Instant 无法与scenario_time 互相换算。缺少该绑定的快照不能声称自己能独立解释观测时刻。
+	TimeBase        *TimeBase       `json:"time_base,omitempty"`
 	TrafficResource TrafficResource `json:"traffic_resource"`
 
 	// WorldId 场景/世界唯一标识。
@@ -1437,12 +1823,27 @@ type Node struct {
 	// NodeType 节点类型。该枚举用于分类，不应驱动核心模型中的场景特化逻辑。
 	NodeType NodeNodeType `json:"node_type"`
 
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
+
 	// State 节点在当前 scenario_time 下的动态状态。
 	State NodeState `json:"state"`
 }
 
 // NodeNodeType 节点类型。该枚举用于分类，不应驱动核心模型中的场景特化逻辑。
 type NodeNodeType string
+
+// NodeBodyFrameRef 对某个场景实体机体系的引用。使用被引用实体在同一时刻的姿态；引用产生的姿态依赖参与位姿依赖图，不允许用上一 tick 的姿态打破环。
+type NodeBodyFrameRef struct {
+	// Node 场景实体的稳定名称。
+	Node string `json:"node"`
+
+	// Type 引用种类判别字段。
+	Type NodeBodyFrameRefType `json:"type"`
+}
+
+// NodeBodyFrameRefType 引用种类判别字段。
+type NodeBodyFrameRefType string
 
 // NodeCapabilities 节点作为独立硬件个体所具备的静态/慢变化能力集合。
 type NodeCapabilities struct {
@@ -1467,6 +1868,8 @@ type NodeCapabilities struct {
 
 // NodeState 节点在当前 scenario_time 下的动态状态。
 type NodeState struct {
+	// Availability 某一个量或某一个实体的可观测性。这是本契约的一等语义：不可观测不得用 0、默认值或缺失字段表示，否则世界模型会把「没有观测」训练成真实值（例如把未采集的 CPU 利用率学成 0）。对应外部系统的 coverage / partial / unknown 语义；partial 既不代表失败，也不代表缺失值为 0。
+	Availability           *Availability                `json:"availability,omitempty"`
 	CommunicationTerminals []CommunicationTerminalState `json:"communication_terminals"`
 
 	// CpuUtilization CPU 利用率，统一使用 0~1。
@@ -1496,9 +1899,57 @@ type NodeState struct {
 	// Position 节点在当前 scenario_time 下的位置状态。位置属于 Node State，而不是 Physical World。
 	Position Position `json:"position"`
 
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
+
 	// Velocity 节点在当前 scenario_time 下相对于 position.frame 的速度。
 	Velocity Velocity `json:"velocity"`
 }
+
+// OblateEllipsoidBodyShape 扁椭球天体形状，用于表达 WGS84 之类的参考椭球。
+type OblateEllipsoidBodyShape struct {
+	// InverseFlattening 扁率倒数 1/f。
+	InverseFlattening float64 `json:"inverse_flattening"`
+
+	// SemiMajorAxisM 长半轴，单位为米。
+	SemiMajorAxisM float64                      `json:"semi_major_axis_m"`
+	Type           OblateEllipsoidBodyShapeType `json:"type"`
+}
+
+// OblateEllipsoidBodyShapeType defines model for OblateEllipsoidBodyShape.Type.
+type OblateEllipsoidBodyShapeType string
+
+// ObservationPositionFormat 位置表达格式，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 ObservationPositionFormat，语义保持一致。 消费方必须按 response 中解析后的格式解释数值，不得把任意笛卡尔坐标自动当作地球固连坐标。
+type ObservationPositionFormat struct {
+	union json.RawMessage
+}
+
+// ObservationStamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+type ObservationStamp struct {
+	// ObservedAtInstant 绝对时刻 + 时间尺度，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Instant，语义保持一致。 value 是不带时区后缀的扩展 ISO-8601，scale 单独决定时间尺度。 世界模型自身的内部时间轴仍是 scenario_time；Instant 只用于把观测锚定到外部系统的绝对时间，二者通过 TimeBase 换算。
+	ObservedAtInstant *Instant `json:"observed_at_instant,omitempty"`
+
+	// ObservedAtScenarioTime 场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。
+	ObservedAtScenarioTime *ScenarioTime `json:"observed_at_scenario_time,omitempty"`
+
+	// Sampling 该观测相对请求时刻的采样策略。Replay 场景必须显式声明，不允许由 adapter 自行选择，否则回放结果不可复现。
+	Sampling *ObservationStampSampling `json:"sampling,omitempty"`
+
+	// SourceRecordId 源系统内部的记录标识，不要求全局唯一。
+	SourceRecordId *string `json:"source_record_id,omitempty"`
+
+	// SourceSystem 产生该观测的外部系统名称。
+	SourceSystem string `json:"source_system"`
+
+	// ValidFrom 场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。
+	ValidFrom *ScenarioTime `json:"valid_from,omitempty"`
+
+	// ValidUntil 场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。
+	ValidUntil *ScenarioTime `json:"valid_until,omitempty"`
+}
+
+// ObservationStampSampling 该观测相对请求时刻的采样策略。Replay 场景必须显式声明，不允许由 adapter 自行选择，否则回放结果不可复现。
+type ObservationStampSampling string
 
 // Orientation 节点姿态。对需要指向、波束、平台姿态等场景有意义。
 type Orientation struct {
@@ -1653,6 +2104,9 @@ type PhysicalWorld struct {
 		// TerrainModelId 外部地形模型标识。
 		TerrainModelId *string `json:"terrain_model_id,omitempty"`
 	} `json:"spatial_environment"`
+
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
 }
 
 // PhysicalWorldEnvironmentType 场景的宏观物理环境分类，仅用于描述和筛选，不决定核心计算逻辑。
@@ -1690,6 +2144,34 @@ type Position struct {
 		Value float32 `json:"value"`
 	} `json:"z"`
 }
+
+// Provenance 该快照的数据来源。数据血缘必须能从快照本身读出，不能依赖外部记录；否则异步数据源的对齐结果无法审计，数据集也无法精确复现。
+type Provenance struct {
+	// Adapter 执行映射的 adapter 名称。
+	Adapter *string `json:"adapter,omitempty"`
+
+	// AdapterVersion 映射规范（mapping spec）的名称与版本；用于精确复现数据集。
+	AdapterVersion *string `json:"adapter_version,omitempty"`
+
+	// ImportedAt 导入发生的墙上时钟时间；仅用于审计，不参与任何计算。
+	ImportedAt *time.Time `json:"imported_at,omitempty"`
+	Notes      *string    `json:"notes,omitempty"`
+
+	// RawSourceRefs 原始文件或流的引用（路径、URI 或对象名）。
+	RawSourceRefs *[]string `json:"raw_source_refs,omitempty"`
+
+	// SimulationRunId 外部仿真系统的运行标识。
+	SimulationRunId *string `json:"simulation_run_id,omitempty"`
+
+	// SourceRecordIds 参与该快照的原始记录标识。
+	SourceRecordIds *[]string `json:"source_record_ids,omitempty"`
+
+	// SourceSystem 产生原始数据的外部系统名称。
+	SourceSystem string `json:"source_system"`
+}
+
+// QuaternionXYZW 单位四元数 [x, y, z, w]（标量在最后），vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 QuaternionXYZW，语义保持一致。 表示从字段名所指 source frame 到 target frame 的主动旋转；分量顺序固定为 XYZW，禁止使用 wxyz 顺序。
+type QuaternionXYZW = []float64
 
 // QueueState 链路或接口上的队列状态。第一阶段可只采集可获得的聚合队列指标。
 type QueueState struct {
@@ -1729,6 +2211,18 @@ type ReachabilityEntry struct {
 // ReachabilityEntryDerived 标识该记录为派生状态。
 type ReachabilityEntryDerived bool
 
+// ReferenceFrame 场景声明的命名参考系，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 ReferenceFrame，语义保持一致。 parent 与 transform 共同把它连到父参考系；根参考系省略 parent。帧目录内容变化必须体现为帧目录版本变化。
+type ReferenceFrame struct {
+	// Name 场景内稳定的命名参考系标识；同一场景内唯一，且不得使用显示名。
+	Name string `json:"name"`
+
+	// Parent 对场景声明的命名参考系的引用。
+	Parent *NamedFrameRef `json:"parent,omitempty"`
+
+	// Transform 参考系变换链上的一环，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameTransform，语义保持一致。
+	Transform FrameTransform `json:"transform"`
+}
+
 // ResourceAllocation 显式表示网络资源当前被谁占用多少，用于学习任务保障、抢占和资源倾斜规律。
 type ResourceAllocation struct {
 	AllocationId string `json:"allocation_id"`
@@ -1755,6 +2249,9 @@ type ResourceAllocation struct {
 	// Priority 该资源分配记录对应的调度优先级。
 	Priority *int        `json:"priority,omitempty"`
 	Resource ResourceRef `json:"resource"`
+
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
 }
 
 // ResourceRef defines model for ResourceRef.
@@ -1792,6 +2289,16 @@ type SchemaMetadata struct {
 
 // SchemaMetadataName Schema 固定名称。
 type SchemaMetadataName string
+
+// SphereBodyShape 球形天体形状。
+type SphereBodyShape struct {
+	// RadiusM 球半径，单位为米。
+	RadiusM float64             `json:"radius_m"`
+	Type    SphereBodyShapeType `json:"type"`
+}
+
+// SphereBodyShapeType defines model for SphereBodyShape.Type.
+type SphereBodyShapeType string
 
 // TargetRef defines model for TargetRef.
 type TargetRef struct {
@@ -1842,6 +2349,9 @@ type Task struct {
 	// Requirements 任务对网络和执行过程提出的约束与优化目标。
 	Requirements TaskRequirements `json:"requirements"`
 	SourceNode   string           `json:"source_node"`
+
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
 
 	// State 任务在当前 scenario_time 下的执行状态。
 	State TaskState `json:"state"`
@@ -1998,6 +2508,18 @@ type TaskState struct {
 // TaskStateStatus 任务生命周期状态。
 type TaskStateStatus string
 
+// TimeBase 把世界模型的内部时间轴（scenario_time，相对秒）锚定到外部系统的绝对时刻。该绑定在一个场景内唯一且不变，否则 ObservationStamp 中的 Instant 无法与scenario_time 互相换算。缺少该绑定的快照不能声称自己能独立解释观测时刻。
+type TimeBase struct {
+	// ScenarioEpoch 绝对时刻 + 时间尺度，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Instant，语义保持一致。 value 是不带时区后缀的扩展 ISO-8601，scale 单独决定时间尺度。 世界模型自身的内部时间轴仍是 scenario_time；Instant 只用于把观测锚定到外部系统的绝对时间，二者通过 TimeBase 换算。
+	ScenarioEpoch Instant `json:"scenario_epoch"`
+
+	// SimulationStart 绝对时刻 + 时间尺度，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Instant，语义保持一致。 value 是不带时区后缀的扩展 ISO-8601，scale 单独决定时间尺度。 世界模型自身的内部时间轴仍是 scenario_time；Instant 只用于把观测锚定到外部系统的绝对时间，二者通过 TimeBase 换算。
+	SimulationStart Instant `json:"simulation_start"`
+
+	// TickS 逻辑仿真 tick 长度，单位为秒。用于表达观测的最细时间粒度，也是时序对齐 binning 窗口的下界。
+	TickS *float32 `json:"tick_s,omitempty"`
+}
+
 // TrafficAggregateState defines model for TrafficAggregateState.
 type TrafficAggregateState struct {
 	// CongestedLinks 被判定为拥塞的 link_id 列表。
@@ -2040,6 +2562,9 @@ type TrafficDemand struct {
 	} `json:"requested_rate,omitempty"`
 	SourceNode string `json:"source_node"`
 
+	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
+	Stamp *ObservationStamp `json:"stamp,omitempty"`
+
 	// TaskId 产生该需求的 Task，可为空。
 	TaskId *string `json:"task_id,omitempty"`
 
@@ -2060,6 +2585,31 @@ type TrafficResource struct {
 	Demands        []TrafficDemand        `json:"demands"`
 	Flows          []Flow                 `json:"flows"`
 }
+
+// UniformRotationFrameTransform 匀速旋转变换：子参考系相对父参考系绕固定轴匀速旋转。
+type UniformRotationFrameTransform struct {
+	// AxisParent 三维向量 [x, y, z]，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Vec3，语义保持一致。 单位由引用它的字段名声明显式声明（例如 _m、_m_s、_rad_s），不得依赖调用方推测。
+	AxisParent Vec3 `json:"axis_parent"`
+
+	// Epoch 绝对时刻 + 时间尺度，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Instant，语义保持一致。 value 是不带时区后缀的扩展 ISO-8601，scale 单独决定时间尺度。 世界模型自身的内部时间轴仍是 scenario_time；Instant 只用于把观测锚定到外部系统的绝对时间，二者通过 TimeBase 换算。
+	Epoch Instant `json:"epoch"`
+
+	// OriginParentM 三维向量 [x, y, z]，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Vec3，语义保持一致。 单位由引用它的字段名声明显式声明（例如 _m、_m_s、_rad_s），不得依赖调用方推测。
+	OriginParentM Vec3 `json:"origin_parent_m"`
+
+	// PhaseAtEpochRad 历元时绕旋转轴的相位，单位为 rad。
+	PhaseAtEpochRad float64 `json:"phase_at_epoch_rad"`
+
+	// RateRadS 角速度，单位为 rad/s。
+	RateRadS float64                           `json:"rate_rad_s"`
+	Type     UniformRotationFrameTransformType `json:"type"`
+}
+
+// UniformRotationFrameTransformType defines model for UniformRotationFrameTransform.Type.
+type UniformRotationFrameTransformType string
+
+// Vec3 三维向量 [x, y, z]，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Vec3，语义保持一致。 单位由引用它的字段名声明显式声明（例如 _m、_m_s、_rad_s），不得依赖调用方推测。
+type Vec3 = []float64
 
 // Velocity 节点在当前 scenario_time 下相对于 position.frame 的速度。
 type Velocity struct {
@@ -2194,4 +2744,420 @@ func (a Constraint) MarshalJSON() ([]byte, error) {
 		}
 	}
 	return json.Marshal(object)
+}
+
+// AsSphereBodyShape returns the union data inside the BodyShape as a SphereBodyShape
+func (t BodyShape) AsSphereBodyShape() (SphereBodyShape, error) {
+	var body SphereBodyShape
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSphereBodyShape overwrites any union data inside the BodyShape as the provided SphereBodyShape
+func (t *BodyShape) FromSphereBodyShape(v SphereBodyShape) error {
+	v.Type = "Sphere"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSphereBodyShape performs a merge with any union data inside the BodyShape, using the provided SphereBodyShape
+func (t *BodyShape) MergeSphereBodyShape(v SphereBodyShape) error {
+	v.Type = "Sphere"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsOblateEllipsoidBodyShape returns the union data inside the BodyShape as a OblateEllipsoidBodyShape
+func (t BodyShape) AsOblateEllipsoidBodyShape() (OblateEllipsoidBodyShape, error) {
+	var body OblateEllipsoidBodyShape
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOblateEllipsoidBodyShape overwrites any union data inside the BodyShape as the provided OblateEllipsoidBodyShape
+func (t *BodyShape) FromOblateEllipsoidBodyShape(v OblateEllipsoidBodyShape) error {
+	v.Type = "OblateEllipsoid"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOblateEllipsoidBodyShape performs a merge with any union data inside the BodyShape, using the provided OblateEllipsoidBodyShape
+func (t *BodyShape) MergeOblateEllipsoidBodyShape(v OblateEllipsoidBodyShape) error {
+	v.Type = "OblateEllipsoid"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t BodyShape) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t BodyShape) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "OblateEllipsoid":
+		return t.AsOblateEllipsoidBodyShape()
+	case "Sphere":
+		return t.AsSphereBodyShape()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t BodyShape) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *BodyShape) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsNamedFrameRef returns the union data inside the FrameRef as a NamedFrameRef
+func (t FrameRef) AsNamedFrameRef() (NamedFrameRef, error) {
+	var body NamedFrameRef
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromNamedFrameRef overwrites any union data inside the FrameRef as the provided NamedFrameRef
+func (t *FrameRef) FromNamedFrameRef(v NamedFrameRef) error {
+	v.Type = "NamedFrame"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeNamedFrameRef performs a merge with any union data inside the FrameRef, using the provided NamedFrameRef
+func (t *FrameRef) MergeNamedFrameRef(v NamedFrameRef) error {
+	v.Type = "NamedFrame"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsNodeBodyFrameRef returns the union data inside the FrameRef as a NodeBodyFrameRef
+func (t FrameRef) AsNodeBodyFrameRef() (NodeBodyFrameRef, error) {
+	var body NodeBodyFrameRef
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromNodeBodyFrameRef overwrites any union data inside the FrameRef as the provided NodeBodyFrameRef
+func (t *FrameRef) FromNodeBodyFrameRef(v NodeBodyFrameRef) error {
+	v.Type = "NodeBodyFrame"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeNodeBodyFrameRef performs a merge with any union data inside the FrameRef, using the provided NodeBodyFrameRef
+func (t *FrameRef) MergeNodeBodyFrameRef(v NodeBodyFrameRef) error {
+	v.Type = "NodeBodyFrame"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t FrameRef) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t FrameRef) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "NamedFrame":
+		return t.AsNamedFrameRef()
+	case "NodeBodyFrame":
+		return t.AsNodeBodyFrameRef()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t FrameRef) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *FrameRef) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsIdentityFrameTransform returns the union data inside the FrameTransform as a IdentityFrameTransform
+func (t FrameTransform) AsIdentityFrameTransform() (IdentityFrameTransform, error) {
+	var body IdentityFrameTransform
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromIdentityFrameTransform overwrites any union data inside the FrameTransform as the provided IdentityFrameTransform
+func (t *FrameTransform) FromIdentityFrameTransform(v IdentityFrameTransform) error {
+	v.Type = "Identity"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeIdentityFrameTransform performs a merge with any union data inside the FrameTransform, using the provided IdentityFrameTransform
+func (t *FrameTransform) MergeIdentityFrameTransform(v IdentityFrameTransform) error {
+	v.Type = "Identity"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFixedFrameTransform returns the union data inside the FrameTransform as a FixedFrameTransform
+func (t FrameTransform) AsFixedFrameTransform() (FixedFrameTransform, error) {
+	var body FixedFrameTransform
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFixedFrameTransform overwrites any union data inside the FrameTransform as the provided FixedFrameTransform
+func (t *FrameTransform) FromFixedFrameTransform(v FixedFrameTransform) error {
+	v.Type = "Fixed"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFixedFrameTransform performs a merge with any union data inside the FrameTransform, using the provided FixedFrameTransform
+func (t *FrameTransform) MergeFixedFrameTransform(v FixedFrameTransform) error {
+	v.Type = "Fixed"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsUniformRotationFrameTransform returns the union data inside the FrameTransform as a UniformRotationFrameTransform
+func (t FrameTransform) AsUniformRotationFrameTransform() (UniformRotationFrameTransform, error) {
+	var body UniformRotationFrameTransform
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromUniformRotationFrameTransform overwrites any union data inside the FrameTransform as the provided UniformRotationFrameTransform
+func (t *FrameTransform) FromUniformRotationFrameTransform(v UniformRotationFrameTransform) error {
+	v.Type = "UniformRotation"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeUniformRotationFrameTransform performs a merge with any union data inside the FrameTransform, using the provided UniformRotationFrameTransform
+func (t *FrameTransform) MergeUniformRotationFrameTransform(v UniformRotationFrameTransform) error {
+	v.Type = "UniformRotation"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsEphemerisFrameTransform returns the union data inside the FrameTransform as a EphemerisFrameTransform
+func (t FrameTransform) AsEphemerisFrameTransform() (EphemerisFrameTransform, error) {
+	var body EphemerisFrameTransform
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromEphemerisFrameTransform overwrites any union data inside the FrameTransform as the provided EphemerisFrameTransform
+func (t *FrameTransform) FromEphemerisFrameTransform(v EphemerisFrameTransform) error {
+	v.Type = "Ephemeris"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeEphemerisFrameTransform performs a merge with any union data inside the FrameTransform, using the provided EphemerisFrameTransform
+func (t *FrameTransform) MergeEphemerisFrameTransform(v EphemerisFrameTransform) error {
+	v.Type = "Ephemeris"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t FrameTransform) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t FrameTransform) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "Ephemeris":
+		return t.AsEphemerisFrameTransform()
+	case "Fixed":
+		return t.AsFixedFrameTransform()
+	case "Identity":
+		return t.AsIdentityFrameTransform()
+	case "UniformRotation":
+		return t.AsUniformRotationFrameTransform()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t FrameTransform) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *FrameTransform) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsCartesianObservationFormat returns the union data inside the ObservationPositionFormat as a CartesianObservationFormat
+func (t ObservationPositionFormat) AsCartesianObservationFormat() (CartesianObservationFormat, error) {
+	var body CartesianObservationFormat
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCartesianObservationFormat overwrites any union data inside the ObservationPositionFormat as the provided CartesianObservationFormat
+func (t *ObservationPositionFormat) FromCartesianObservationFormat(v CartesianObservationFormat) error {
+	v.Type = "Cartesian"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCartesianObservationFormat performs a merge with any union data inside the ObservationPositionFormat, using the provided CartesianObservationFormat
+func (t *ObservationPositionFormat) MergeCartesianObservationFormat(v CartesianObservationFormat) error {
+	v.Type = "Cartesian"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsGeodeticObservationFormat returns the union data inside the ObservationPositionFormat as a GeodeticObservationFormat
+func (t ObservationPositionFormat) AsGeodeticObservationFormat() (GeodeticObservationFormat, error) {
+	var body GeodeticObservationFormat
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromGeodeticObservationFormat overwrites any union data inside the ObservationPositionFormat as the provided GeodeticObservationFormat
+func (t *ObservationPositionFormat) FromGeodeticObservationFormat(v GeodeticObservationFormat) error {
+	v.Type = "Geodetic"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeGeodeticObservationFormat performs a merge with any union data inside the ObservationPositionFormat, using the provided GeodeticObservationFormat
+func (t *ObservationPositionFormat) MergeGeodeticObservationFormat(v GeodeticObservationFormat) error {
+	v.Type = "Geodetic"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ObservationPositionFormat) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t ObservationPositionFormat) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "Cartesian":
+		return t.AsCartesianObservationFormat()
+	case "Geodetic":
+		return t.AsGeodeticObservationFormat()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t ObservationPositionFormat) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ObservationPositionFormat) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
 }
