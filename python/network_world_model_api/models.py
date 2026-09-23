@@ -301,19 +301,6 @@ class CpuComputeCapacity(BaseModel):
     )
 
 
-class GpuComputeCapacity(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    value: float = Field(
-        ..., description='数值。为空表示该指标当前未采集、不可用或不适用于当前对象。'
-    )
-    unit: str = Field(
-        ...,
-        description='物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。',
-    )
-
-
 class MemoryCapacity(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -331,32 +318,13 @@ class ComputeCapability(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    cpu_architecture: str | None = Field(
-        None, description='CPU 架构，例如 x86_64、aarch64。'
-    )
     cpu_cores: conint(ge=0) | None = Field(
         None, description='CPU 逻辑/物理核心数，具体口径由数据源约定。'
     )
     cpu_compute_capacity: CpuComputeCapacity | None = Field(
         None, description='CPU 理论计算能力。'
     )
-    gpu_count: conint(ge=0) | None = Field(None, description='GPU 数量。')
-    gpu_model: str | None = Field(None, description='GPU 型号。')
-    gpu_compute_capacity: GpuComputeCapacity | None = Field(
-        None, description='GPU 理论计算能力。'
-    )
     memory_capacity: MemoryCapacity | None = Field(None, description='内存总容量。')
-
-
-class PayloadCapability(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    payload_id: str = Field(..., description='载荷在节点内的唯一标识。')
-    payload_type: str = Field(
-        ..., description='载荷类型。该字段保持开放，便于适配不同仿真系统。'
-    )
-    capabilities: dict[str, Any] | None = Field(None, description='载荷特有能力参数。')
 
 
 class TerminalType(Enum):
@@ -510,7 +478,6 @@ class NodeCapabilities(BaseModel):
     storage_capacity: StorageCapacity | None = Field(
         None, description='节点本地存储总容量。'
     )
-    payloads: list[PayloadCapability] | None = None
     communication_terminals: list[CommunicationTerminalCapability]
     extensions: dict[str, Any] | None = Field(None, description='节点特有能力扩展。')
 
@@ -589,43 +556,6 @@ class L2Endpoint(BaseModel):
     terminal_id: str = Field(..., description='引用对应节点的 communication terminal。')
 
 
-class QueueDepth(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    value: float = Field(
-        ..., description='数值。为空表示该指标当前未采集、不可用或不适用于当前对象。'
-    )
-    unit: str = Field(
-        ...,
-        description='物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。',
-    )
-
-
-class QueueCapacity(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    value: float = Field(
-        ..., description='数值。为空表示该指标当前未采集、不可用或不适用于当前对象。'
-    )
-    unit: str = Field(
-        ...,
-        description='物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。',
-    )
-
-
-class QueueState(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    queue_depth: QueueDepth | None = Field(None, description='当前排队数据量。')
-    queue_capacity: QueueCapacity | None = Field(None, description='队列容量。')
-    utilization: confloat(ge=0.0, le=1.0) | None = Field(
-        None, description='队列利用率，0~1。'
-    )
-
-
 class LinkClass(Enum):
     ISL = 'ISL'
     SPACE_GROUND = 'SPACE_GROUND'
@@ -644,19 +574,6 @@ class Medium(Enum):
     FIBER = 'FIBER'
     OPTICAL = 'OPTICAL'
     GENERIC = 'GENERIC'
-
-
-class MaxCapacity(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    value: float = Field(
-        ..., description='数值。为空表示该指标当前未采集、不可用或不适用于当前对象。'
-    )
-    unit: str = Field(
-        ...,
-        description='物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。',
-    )
 
 
 class Status(Enum):
@@ -744,19 +661,6 @@ class IPAddress(BaseModel):
     prefix_length: conint(ge=0, le=128) = Field(..., description='前缀长度。')
     family: Family = Field(..., description='地址族。')
     primary: bool = Field(..., description='是否为该 L3 接口主地址。')
-
-
-class Mtu(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    value: float = Field(
-        ..., description='数值。为空表示该指标当前未采集、不可用或不适用于当前对象。'
-    )
-    unit: str = Field(
-        ...,
-        description='物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。',
-    )
 
 
 class L3LogicalEndpoint(BaseModel):
@@ -854,7 +758,6 @@ class L3Path(BaseModel):
     path_id: str
     source_node: str
     destination_node: str
-    network_context: str
     nodes: list[str] = Field(..., min_length=1)
     logical_links: list[str]
     valid: bool
@@ -1462,6 +1365,12 @@ class NetworkDerivedMetrics(BaseModel):
     packet_loss_rate: confloat(ge=0.0, le=1.0) | None = None
     maximum_link_utilization: confloat(ge=0.0) | None = None
     congested_link_count: conint(ge=0) | None = None
+    reachability: list[ReachabilityEntry] | None = Field(
+        None, description='由转发状态推导得到的端到端可达性集合（派生状态）。'
+    )
+    paths: list[L3Path] | None = Field(
+        None, description='由转发状态推导得到的端到端路径集合（派生状态）。'
+    )
 
 
 class TaskDerivedMetrics(BaseModel):
@@ -1935,15 +1844,9 @@ class NodeState(BaseModel):
         description='节点绕机体系三轴的角速度 [wx, wy, wz] (rad/s)。姿态演化预测必需。',
     )
     operational: bool = Field(..., description='节点整体是否处于工作状态。')
-    health_score: confloat(ge=0.0, le=1.0) | None = Field(
-        None, description='可选健康度，0 表示完全不可用，1 表示完全健康。'
-    )
     faults: list[str] | None = Field(None, description='当前生效的故障/异常标识。')
     cpu_utilization: confloat(ge=0.0, le=1.0) | None = Field(
         None, description='CPU 利用率，统一使用 0~1。'
-    )
-    gpu_utilization: confloat(ge=0.0, le=1.0) | None = Field(
-        None, description='GPU 利用率，统一使用 0~1。'
     )
     memory_utilization: confloat(ge=0.0, le=1.0) | None = Field(
         None, description='内存利用率，统一使用 0~1。'
@@ -1989,8 +1892,6 @@ class L2Link(BaseModel):
     endpoint_b: L2Endpoint
     link_class: LinkClass = Field(..., description='场景语义上的链路分类。')
     medium: Medium = Field(..., description='实际通信媒介。')
-    max_capacity: MaxCapacity = Field(..., description='链路静态/理论最大容量。')
-    operational: bool = Field(..., description='链路当前是否可工作。')
     status: Status = Field(..., description='链路当前运行状态。')
     capacity: Capacity = Field(..., description='当前有效容量。')
     throughput_bps: confloat(ge=0.0) | None = Field(
@@ -2013,7 +1914,6 @@ class L2Link(BaseModel):
     bit_error_rate: confloat(ge=0.0, le=1.0) | None = Field(
         None, description='可选比特误码率，0~1。'
     )
-    queue: QueueState | None = None
     availability: Availability | None = Field(
         None,
         description='该对象动态状态的可观测性。不可观测时不得用默认值填充具体字段，必须在 availability 中显式声明 state=unavailable。',
@@ -2040,11 +1940,7 @@ class L3Interface(BaseModel):
     node_id: str = Field(..., description='所属节点 ID。')
     terminal_id: str | None = Field(None, description='可选关联的 L2/通信终端 ID。')
     enabled: bool = Field(..., description='接口是否启用。')
-    mtu: Mtu = Field(..., description='接口 MTU。')
     addresses: list[IPAddress]
-    network_context: str = Field(
-        ..., description='逻辑网络上下文，例如 default、VRF/租户/Overlay 标识。'
-    )
     stamp: ObservationStamp | None = Field(
         None,
         description='该对象本次观测的溯源与有效窗口。省略表示该对象没有携带观测元数据，此时必须按 Availability 语义处理，而不是假定它一定是最新值。',
@@ -2058,7 +1954,6 @@ class L3LogicalLink(BaseModel):
     logical_link_id: str = Field(..., description='三层逻辑链路唯一 ID。')
     endpoint_a: L3LogicalEndpoint
     endpoint_b: L3LogicalEndpoint
-    network_context: str
     operational: bool = Field(..., description='逻辑链路当前是否有效。')
     type: Type = Field(..., description='三层逻辑连接类型。')
     stamp: ObservationStamp | None = Field(
@@ -2073,7 +1968,6 @@ class ForwardingEntry(BaseModel):
     )
     forwarding_id: str = Field(..., description='Forwarding Entry 唯一 ID。')
     node_id: str = Field(..., description='执行该转发决策的节点。')
-    network_context: str
     destination: Destination
     next_hops: list[NextHop] = Field(..., description='有效下一跳集合。', min_length=1)
     valid_from: ScenarioTime
@@ -2092,9 +1986,7 @@ class L3Network(BaseModel):
     )
     interfaces: list[L3Interface]
     logical_links: list[L3LogicalLink]
-    reachability: list[ReachabilityEntry] | None = None
     forwarding_entries: list[ForwardingEntry]
-    paths: list[L3Path] | None = None
     aggregate_state: L3AggregateState | None = None
     extensions: dict[str, Any] | None = None
 
@@ -2232,22 +2124,10 @@ class NetworkIntent(BaseModel):
     extensions: dict[str, Any] | None = None
 
 
-class NetworkWorldState(BaseModel):
+class NetworkState(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    schema_: SchemaMetadata = Field(..., alias='schema')
-    world_id: str = Field(..., description='场景/世界唯一标识。')
-    snapshot_id: str = Field(..., description='当前 World Snapshot 唯一标识。')
-    scenario_time: ScenarioTime
-    delta_time: ScenarioTime | None = Field(
-        None, description='与上一 Snapshot 的场景时间间隔。'
-    )
-    time_base: TimeBase | None = Field(
-        None,
-        description='把 scenario_time 锚定到绝对时刻的时间基。缺少它时，ObservationStamp 中的 Instant 与 scenario_time 无法互相换算。',
-    )
-    physical_world: PhysicalWorld
     nodes: list[Node]
     l2_network: L2Network
     l3_network: L3Network
@@ -2261,6 +2141,35 @@ class NetworkWorldState(BaseModel):
         ..., description='与当前快照相关、在该时间窗口内发生的外部主动 Action。'
     )
     derived_metrics: DerivedMetrics | None = Field(None, description='可选派生指标。')
+
+
+class WorldState(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    physical_world: PhysicalWorld | None = Field(
+        None, description='外部物理世界与空间几何环境（低频稀疏注入）。'
+    )
+    network: NetworkState = Field(
+        ..., description='内生通信网络完整拓扑、资源与业务状态。'
+    )
+
+
+class NetworkWorldState(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    schema_: SchemaMetadata = Field(..., alias='schema')
+    world_id: str = Field(..., description='场景/世界唯一标识。')
+    snapshot_id: str = Field(..., description='当前 World Snapshot 唯一标识。')
+    scenario_time: ScenarioTime
+    time_base: TimeBase | None = Field(
+        None,
+        description='把 scenario_time 锚定到绝对时刻的时间基。缺少它时，ObservationStamp 中的 Instant 与 scenario_time 无法互相换算。',
+    )
+    state: WorldState = Field(
+        ..., description='该快照对应的世界状态本体（包含物理环境与网络状态）。'
+    )
     availability: Availability | None = Field(
         None,
         description='该快照整体的可观测性/覆盖率。partial=true 的快照只能解释为部分状态，不能当作完整网络结论。',

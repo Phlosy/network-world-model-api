@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Network World State Schema",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "network-world-model 的协议无关世界状态数据契约。用于将外部仿真系统采集的数据统一映射为标准 Network World State，支持后续时序对齐、Transition/Sequence Dataset 构建、World Model 训练、预测与 Rollout。"
   },
   "paths": {},
@@ -493,11 +493,6 @@
         "type": "object",
         "description": "节点的静态或慢变化计算能力。",
         "properties": {
-          "cpu_architecture": {
-            "type": "string",
-            "nullable": true,
-            "description": "CPU 架构，例如 x86_64、aarch64。"
-          },
           "cpu_cores": {
             "type": "integer",
             "nullable": true,
@@ -508,38 +503,6 @@
             "type": "object",
             "nullable": true,
             "description": "CPU 理论计算能力。",
-            "properties": {
-              "value": {
-                "type": "number",
-                "nullable": true,
-                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
-              },
-              "unit": {
-                "type": "string",
-                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
-              }
-            },
-            "required": [
-              "value",
-              "unit"
-            ],
-            "additionalProperties": false
-          },
-          "gpu_count": {
-            "type": "integer",
-            "nullable": true,
-            "minimum": 0,
-            "description": "GPU 数量。"
-          },
-          "gpu_model": {
-            "type": "string",
-            "nullable": true,
-            "description": "GPU 型号。"
-          },
-          "gpu_compute_capacity": {
-            "type": "object",
-            "nullable": true,
-            "description": "GPU 理论计算能力。",
             "properties": {
               "value": {
                 "type": "number",
@@ -579,30 +542,6 @@
             "additionalProperties": false
           }
         },
-        "additionalProperties": false
-      },
-      "PayloadCapability": {
-        "type": "object",
-        "description": "节点搭载的任务载荷或功能载荷，例如雷达、相机、传感器或专用处理载荷。",
-        "properties": {
-          "payload_id": {
-            "type": "string",
-            "description": "载荷在节点内的唯一标识。"
-          },
-          "payload_type": {
-            "type": "string",
-            "description": "载荷类型。该字段保持开放，便于适配不同仿真系统。"
-          },
-          "capabilities": {
-            "type": "object",
-            "description": "载荷特有能力参数。",
-            "additionalProperties": true
-          }
-        },
-        "required": [
-          "payload_id",
-          "payload_type"
-        ],
         "additionalProperties": false
       },
       "CommunicationTerminalCapability": {
@@ -828,12 +767,6 @@
             ],
             "additionalProperties": false
           },
-          "payloads": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PayloadCapability"
-            }
-          },
           "communication_terminals": {
             "type": "array",
             "items": {
@@ -988,13 +921,6 @@
             "type": "boolean",
             "description": "节点整体是否处于工作状态。"
           },
-          "health_score": {
-            "type": "number",
-            "nullable": true,
-            "minimum": 0,
-            "maximum": 1,
-            "description": "可选健康度，0 表示完全不可用，1 表示完全健康。"
-          },
           "faults": {
             "type": "array",
             "items": {
@@ -1008,13 +934,6 @@
             "minimum": 0,
             "maximum": 1,
             "description": "CPU 利用率，统一使用 0~1。"
-          },
-          "gpu_utilization": {
-            "type": "number",
-            "nullable": true,
-            "minimum": 0,
-            "maximum": 1,
-            "description": "GPU 利用率，统一使用 0~1。"
           },
           "memory_utilization": {
             "type": "number",
@@ -1129,63 +1048,6 @@
         ],
         "additionalProperties": false
       },
-      "QueueState": {
-        "type": "object",
-        "nullable": true,
-        "description": "链路或接口上的队列状态。第一阶段可只采集可获得的聚合队列指标。",
-        "properties": {
-          "queue_depth": {
-            "type": "object",
-            "nullable": true,
-            "description": "当前排队数据量。",
-            "properties": {
-              "value": {
-                "type": "number",
-                "nullable": true,
-                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
-              },
-              "unit": {
-                "type": "string",
-                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
-              }
-            },
-            "required": [
-              "value",
-              "unit"
-            ],
-            "additionalProperties": false
-          },
-          "queue_capacity": {
-            "type": "object",
-            "nullable": true,
-            "description": "队列容量。",
-            "properties": {
-              "value": {
-                "type": "number",
-                "nullable": true,
-                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
-              },
-              "unit": {
-                "type": "string",
-                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
-              }
-            },
-            "required": [
-              "value",
-              "unit"
-            ],
-            "additionalProperties": false
-          },
-          "utilization": {
-            "type": "number",
-            "nullable": true,
-            "minimum": 0,
-            "maximum": 1,
-            "description": "队列利用率，0~1。"
-          }
-        },
-        "additionalProperties": false
-      },
       "L2Link": {
         "type": "object",
         "description": "两个通信终端之间当前存在的二层/通信层连接状态。星间、星地、地面、空地等统一建模。",
@@ -1229,29 +1091,6 @@
               "GENERIC"
             ],
             "description": "实际通信媒介。"
-          },
-          "max_capacity": {
-            "type": "object",
-            "description": "链路静态/理论最大容量。",
-            "properties": {
-              "value": {
-                "type": "number",
-                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
-              },
-              "unit": {
-                "type": "string",
-                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
-              }
-            },
-            "required": [
-              "value",
-              "unit"
-            ],
-            "additionalProperties": false
-          },
-          "operational": {
-            "type": "boolean",
-            "description": "链路当前是否可工作。"
           },
           "status": {
             "type": "string",
@@ -1383,9 +1222,6 @@
             "maximum": 1,
             "description": "可选比特误码率，0~1。"
           },
-          "queue": {
-            "$ref": "#/components/schemas/QueueState"
-          },
           "availability": {
             "$ref": "#/components/schemas/Availability",
             "description": "该对象动态状态的可观测性。不可观测时不得用默认值填充具体字段，必须在 availability 中显式声明 state=unavailable。"
@@ -1407,8 +1243,6 @@
           "endpoint_b",
           "link_class",
           "medium",
-          "max_capacity",
-          "operational",
           "status",
           "capacity",
           "available_bandwidth",
@@ -1491,35 +1325,11 @@
             "type": "boolean",
             "description": "接口是否启用。"
           },
-          "mtu": {
-            "type": "object",
-            "description": "接口 MTU。",
-            "properties": {
-              "value": {
-                "type": "number",
-                "description": "数值。为空表示该指标当前未采集、不可用或不适用于当前对象。"
-              },
-              "unit": {
-                "type": "string",
-                "description": "物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。"
-              }
-            },
-            "required": [
-              "value",
-              "unit"
-            ],
-            "additionalProperties": false
-          },
           "addresses": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/IPAddress"
             }
-          },
-          "network_context": {
-            "type": "string",
-            "description": "逻辑网络上下文，例如 default、VRF/租户/Overlay 标识。",
-            "default": "default"
           },
           "stamp": {
             "$ref": "#/components/schemas/ObservationStamp",
@@ -1530,9 +1340,7 @@
           "l3_interface_id",
           "node_id",
           "enabled",
-          "mtu",
-          "addresses",
-          "network_context"
+          "addresses"
         ],
         "additionalProperties": false
       },
@@ -1566,10 +1374,6 @@
           "endpoint_b": {
             "$ref": "#/components/schemas/L3LogicalEndpoint"
           },
-          "network_context": {
-            "type": "string",
-            "default": "default"
-          },
           "operational": {
             "type": "boolean",
             "description": "逻辑链路当前是否有效。"
@@ -1593,7 +1397,6 @@
           "logical_link_id",
           "endpoint_a",
           "endpoint_b",
-          "network_context",
           "operational",
           "type"
         ],
@@ -1689,10 +1492,6 @@
             "type": "string",
             "description": "执行该转发决策的节点。"
           },
-          "network_context": {
-            "type": "string",
-            "default": "default"
-          },
           "destination": {
             "$ref": "#/components/schemas/Destination"
           },
@@ -1720,7 +1519,6 @@
         "required": [
           "forwarding_id",
           "node_id",
-          "network_context",
           "destination",
           "next_hops",
           "valid_from"
@@ -1800,10 +1598,6 @@
           "destination_node": {
             "type": "string"
           },
-          "network_context": {
-            "type": "string",
-            "default": "default"
-          },
           "nodes": {
             "type": "array",
             "minItems": 1,
@@ -1834,7 +1628,6 @@
           "path_id",
           "source_node",
           "destination_node",
-          "network_context",
           "nodes",
           "logical_links",
           "valid",
@@ -1886,22 +1679,10 @@
               "$ref": "#/components/schemas/L3LogicalLink"
             }
           },
-          "reachability": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReachabilityEntry"
-            }
-          },
           "forwarding_entries": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ForwardingEntry"
-            }
-          },
-          "paths": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/L3Path"
             }
           },
           "aggregate_state": {
@@ -3204,6 +2985,20 @@
             "type": "integer",
             "nullable": true,
             "minimum": 0
+          },
+          "reachability": {
+            "type": "array",
+            "description": "由转发状态推导得到的端到端可达性集合（派生状态）。",
+            "items": {
+              "$ref": "#/components/schemas/ReachabilityEntry"
+            }
+          },
+          "paths": {
+            "type": "array",
+            "description": "由转发状态推导得到的端到端路径集合（派生状态）。",
+            "items": {
+              "$ref": "#/components/schemas/L3Path"
+            }
           }
         },
         "additionalProperties": false
@@ -3262,36 +3057,10 @@
         ],
         "additionalProperties": false
       },
-      "NetworkWorldState": {
+      "NetworkState": {
         "type": "object",
-        "description": "Network World State v0.1 的顶层快照对象。它表示某一个唯一 scenario_time 下，物理环境、节点、L2、L3、流量/资源、任务和网络意图的完整状态。",
+        "description": "内生通信网络完整拓扑、资源、业务、事件与动作的高频运行状态。",
         "properties": {
-          "schema": {
-            "$ref": "#/components/schemas/SchemaMetadata"
-          },
-          "world_id": {
-            "type": "string",
-            "description": "场景/世界唯一标识。"
-          },
-          "snapshot_id": {
-            "type": "string",
-            "description": "当前 World Snapshot 唯一标识。"
-          },
-          "scenario_time": {
-            "$ref": "#/components/schemas/ScenarioTime"
-          },
-          "delta_time": {
-            "$ref": "#/components/schemas/ScenarioTime",
-            "nullable": true,
-            "description": "与上一 Snapshot 的场景时间间隔。"
-          },
-          "time_base": {
-            "$ref": "#/components/schemas/TimeBase",
-            "description": "把 scenario_time 锚定到绝对时刻的时间基。缺少它时，ObservationStamp 中的 Instant 与 scenario_time 无法互相换算。"
-          },
-          "physical_world": {
-            "$ref": "#/components/schemas/PhysicalWorld"
-          },
           "nodes": {
             "type": "array",
             "items": {
@@ -3334,6 +3103,64 @@
             "$ref": "#/components/schemas/DerivedMetrics",
             "nullable": true,
             "description": "可选派生指标。"
+          }
+        },
+        "required": [
+          "nodes",
+          "l2_network",
+          "l3_network",
+          "traffic_resource",
+          "tasks",
+          "network_intent",
+          "events",
+          "external_actions"
+        ],
+        "additionalProperties": false
+      },
+      "WorldState": {
+        "type": "object",
+        "description": "网络与物理世界的动态状态本体容器，与外部信封元数据解耦。",
+        "properties": {
+          "physical_world": {
+            "$ref": "#/components/schemas/PhysicalWorld",
+            "nullable": true,
+            "description": "外部物理世界与空间几何环境（低频稀疏注入）。"
+          },
+          "network": {
+            "$ref": "#/components/schemas/NetworkState",
+            "description": "内生通信网络完整拓扑、资源与业务状态。"
+          }
+        },
+        "required": [
+          "network"
+        ],
+        "additionalProperties": false
+      },
+      "NetworkWorldState": {
+        "type": "object",
+        "description": "Network World State 顶层快照信封对象。承载全局元数据、时间基准、数据血缘与可观测性，封装内部的世界状态本体。",
+        "properties": {
+          "schema": {
+            "$ref": "#/components/schemas/SchemaMetadata"
+          },
+          "world_id": {
+            "type": "string",
+            "description": "场景/世界唯一标识。"
+          },
+          "snapshot_id": {
+            "type": "string",
+            "description": "当前 World Snapshot 唯一标识。"
+          },
+          "scenario_time": {
+            "$ref": "#/components/schemas/ScenarioTime"
+          },
+          "time_base": {
+            "$ref": "#/components/schemas/TimeBase",
+            "description": "把 scenario_time 锚定到绝对时刻的时间基。缺少它时，ObservationStamp 中的 Instant 与 scenario_time 无法互相换算。"
+          },
+          "state": {
+            "$ref": "#/components/schemas/WorldState",
+            "description": "该快照对应的世界状态本体（包含物理环境与网络状态）。"
           },
           "availability": {
             "$ref": "#/components/schemas/Availability",
@@ -3354,15 +3181,7 @@
           "world_id",
           "snapshot_id",
           "scenario_time",
-          "physical_world",
-          "nodes",
-          "l2_network",
-          "l3_network",
-          "traffic_resource",
-          "tasks",
-          "network_intent",
-          "events",
-          "external_actions"
+          "state"
         ],
         "additionalProperties": false
       },

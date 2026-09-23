@@ -36,68 +36,72 @@ func TestNetworkWorldStateJSONRoundtrip(t *testing.T) {
 			Value: timeVal,
 			Unit:  worldstate.S,
 		},
-		Nodes: []worldstate.Node{
-			{
-				NodeId:   "sat-01",
-				NodeType: worldstate.NodeNodeTypeSATELLITE,
-				Enabled:  true,
-				Capabilities: worldstate.NodeCapabilities{
-					CommunicationTerminals: []worldstate.CommunicationTerminalCapability{
-						{
-							TerminalId:   "term-01",
-							TerminalType: worldstate.CommunicationTerminalCapabilityTerminalTypeLASER,
-							Enabled:      true,
+		State: worldstate.WorldState{
+			Network: worldstate.NetworkState{
+				Nodes: []worldstate.Node{
+					{
+						NodeId:   "sat-01",
+						NodeType: worldstate.NodeNodeTypeSATELLITE,
+						Enabled:  true,
+						Capabilities: worldstate.NodeCapabilities{
+							CommunicationTerminals: []worldstate.CommunicationTerminalCapability{
+								{
+									TerminalId:   "term-01",
+									TerminalType: worldstate.CommunicationTerminalCapabilityTerminalTypeLASER,
+									Enabled:      true,
+								},
+							},
 						},
-					},
-				},
-				State: worldstate.NodeState{
-					Operational:            true,
-					CommunicationTerminals: []worldstate.CommunicationTerminalState{},
-					Position: worldstate.Position{
-						Frame: frame,
-						X: struct {
-							Unit  string  `json:"unit"`
-							Value float32 `json:"value"`
-						}{
-							Value: 6371000,
-							Unit:  "m",
-						},
-						Y: struct {
-							Unit  string  `json:"unit"`
-							Value float32 `json:"value"`
-						}{
-							Value: 0,
-							Unit:  "m",
-						},
-						Z: struct {
-							Unit  string  `json:"unit"`
-							Value float32 `json:"value"`
-						}{
-							Value: 0,
-							Unit:  "m",
-						},
-					},
-					Velocity: worldstate.Velocity{
-						Vx: struct {
-							Unit  string  `json:"unit"`
-							Value float32 `json:"value"`
-						}{
-							Value: 0,
-							Unit:  "m/s",
-						},
-						Vy: struct {
-							Unit  string  `json:"unit"`
-							Value float32 `json:"value"`
-						}{
-							Value: 7500,
-							Unit:  "m/s",
-						},
-						Vz: struct {
-							Unit  string  `json:"unit"`
-							Value float32 `json:"value"`
-						}{
-							Value: 0,
-							Unit:  "m/s",
+						State: worldstate.NodeState{
+							Operational:            true,
+							CommunicationTerminals: []worldstate.CommunicationTerminalState{},
+							Position: worldstate.Position{
+								Frame: frame,
+								X: struct {
+									Unit  string  `json:"unit"`
+									Value float32 `json:"value"`
+								}{
+									Value: 6371000,
+									Unit:  "m",
+								},
+								Y: struct {
+									Unit  string  `json:"unit"`
+									Value float32 `json:"value"`
+								}{
+									Value: 0,
+									Unit:  "m",
+								},
+								Z: struct {
+									Unit  string  `json:"unit"`
+									Value float32 `json:"value"`
+								}{
+									Value: 0,
+									Unit:  "m",
+								},
+							},
+							Velocity: worldstate.Velocity{
+								Vx: struct {
+									Unit  string  `json:"unit"`
+									Value float32 `json:"value"`
+								}{
+									Value: 0,
+									Unit:  "m/s",
+								},
+								Vy: struct {
+									Unit  string  `json:"unit"`
+									Value float32 `json:"value"`
+								}{
+									Value: 7500,
+									Unit:  "m/s",
+								},
+								Vz: struct {
+									Unit  string  `json:"unit"`
+									Value float32 `json:"value"`
+								}{
+									Value: 0,
+									Unit:  "m/s",
+								},
+							},
 						},
 					},
 				},
@@ -124,13 +128,13 @@ func TestNetworkWorldStateJSONRoundtrip(t *testing.T) {
 	if decoded.ScenarioTime.Value != timeVal {
 		t.Fatalf("expected scenario time %f, got %f", timeVal, decoded.ScenarioTime.Value)
 	}
-	if len(decoded.Nodes) != 1 {
-		t.Fatalf("expected 1 node, got %d", len(decoded.Nodes))
+	if len(decoded.State.Network.Nodes) != 1 {
+		t.Fatalf("expected 1 node, got %d", len(decoded.State.Network.Nodes))
 	}
-	if decoded.Nodes[0].NodeId != "sat-01" {
-		t.Fatalf("expected node_id sat-01, got %s", decoded.Nodes[0].NodeId)
+	if decoded.State.Network.Nodes[0].NodeId != "sat-01" {
+		t.Fatalf("expected node_id sat-01, got %s", decoded.State.Network.Nodes[0].NodeId)
 	}
-	if len(decoded.Nodes[0].Capabilities.CommunicationTerminals) != 1 {
+	if len(decoded.State.Network.Nodes[0].Capabilities.CommunicationTerminals) != 1 {
 		t.Fatalf("expected 1 terminal capability")
 	}
 }
@@ -252,16 +256,20 @@ func TestAdditiveObservabilityFieldsRoundTrip(t *testing.T) {
 			SourceSystem: "generic-gse",
 			Adapter:      strPtr("generic_gse_v1"),
 		},
-		Nodes: []worldstate.Node{
-			{
-				NodeId:   "sat-01",
-				NodeType: worldstate.NodeNodeTypeSATELLITE,
-				Enabled:  true,
-				State: worldstate.NodeState{
-					Operational: true,
-					Stamp: &worldstate.ObservationStamp{
-						SourceSystem: "generic-gse",
-						Sampling:     samplingPtr(worldstate.SamplingPrevious),
+		State: worldstate.WorldState{
+			Network: worldstate.NetworkState{
+				Nodes: []worldstate.Node{
+					{
+						NodeId:   "sat-01",
+						NodeType: worldstate.NodeNodeTypeSATELLITE,
+						Enabled:  true,
+						State: worldstate.NodeState{
+							Operational: true,
+							Stamp: &worldstate.ObservationStamp{
+								SourceSystem: "generic-gse",
+								Sampling:     samplingPtr(worldstate.SamplingPrevious),
+							},
+						},
 					},
 				},
 			},
@@ -285,10 +293,10 @@ func TestAdditiveObservabilityFieldsRoundTrip(t *testing.T) {
 	if decoded.Provenance == nil || decoded.Provenance.SourceSystem != "generic-gse" {
 		t.Fatal("provenance did not round-trip")
 	}
-	if decoded.Nodes[0].State.Stamp == nil {
+	if decoded.State.Network.Nodes[0].State.Stamp == nil {
 		t.Fatal("node state stamp did not round-trip")
 	}
-	if *decoded.Nodes[0].State.Stamp.Sampling != worldstate.SamplingPrevious {
+	if *decoded.State.Network.Nodes[0].State.Stamp.Sampling != worldstate.SamplingPrevious {
 		t.Fatal("sampling policy did not round-trip")
 	}
 }
@@ -312,7 +320,6 @@ func TestB2AdditionsAndModifications(t *testing.T) {
 		EndpointB:     worldstate.L2Endpoint{NodeId: "sat-02", TerminalId: "t2"},
 		LinkClass:     worldstate.L2LinkLinkClassISL,
 		Medium:        worldstate.L2LinkMediumLASER,
-		Operational:   true,
 		Status:        worldstate.L2LinkStatusUP,
 		ThroughputBps: &throughput,
 	}

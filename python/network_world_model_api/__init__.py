@@ -39,6 +39,7 @@ from .models import (
     NamedFrameRef,
     NetworkDerivedMetrics,
     NetworkIntent,
+    NetworkState,
     NetworkWorldState,
     NextHop,
     Node,
@@ -51,12 +52,10 @@ from .models import (
     OblateEllipsoidBodyShape,
     Orientation,
     PathMetrics,
-    PayloadCapability,
     PhysicalWorld,
     Position,
     Provenance,
     QuaternionXYZW,
-    QueueState,
     ReachabilityEntry,
     ReferenceFrame,
     RequirementSatisfactionState,
@@ -80,9 +79,10 @@ from .models import (
     Vec3,
     Velocity,
     WorldEvent,
+    WorldState,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "Availability",
@@ -120,6 +120,7 @@ __all__ = [
     "NamedFrameRef",
     "NetworkDerivedMetrics",
     "NetworkIntent",
+    "NetworkState",
     "NetworkWorldState",
     "NextHop",
     "Node",
@@ -132,12 +133,10 @@ __all__ = [
     "OblateEllipsoidBodyShape",
     "Orientation",
     "PathMetrics",
-    "PayloadCapability",
     "PhysicalWorld",
     "Position",
     "Provenance",
     "QuaternionXYZW",
-    "QueueState",
     "ReachabilityEntry",
     "ReferenceFrame",
     "RequirementSatisfactionState",
@@ -161,4 +160,5 @@ __all__ = [
     "Vec3",
     "Velocity",
     "WorldEvent",
+    "WorldState",
 ]

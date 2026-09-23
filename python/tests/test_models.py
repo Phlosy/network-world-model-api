@@ -59,7 +59,7 @@ def test_network_world_state_minimal_valid():
     state_dict = {
         "schema": {
             "name": "network-world-state",
-            "version": "0.1.0",
+            "version": "0.2.0",
         },
         "world_id": "world-test-01",
         "snapshot_id": "snap-12345",
@@ -67,101 +67,105 @@ def test_network_world_state_minimal_valid():
             "value": 100.0,
             "unit": "s",
         },
-        "physical_world": {
-            "environment_type": "SPACE",
-            "spatial_environment": {
-                "default_reference_frame": {"type": "NamedFrame", "name": "ECEF"},
-            },
-            "electromagnetic_environment": {
-                "background_noise": {
-                    "value": -100.0,
-                    "unit": "dBm",
+        "state": {
+            "physical_world": {
+                "environment_type": "SPACE",
+                "spatial_environment": {
+                    "default_reference_frame": {"type": "NamedFrame", "name": "ECEF"},
                 },
-                "interference_regions": [],
-            },
-        },
-        "nodes": [
-            {
-                "node_id": "sat-01",
-                "node_type": "SATELLITE",
-                "enabled": True,
-                "capabilities": {
-                    "communication_terminals": [
-                        {
-                            "terminal_id": "term-laser-01",
-                            "terminal_type": "LASER",
-                            "enabled": True,
-                            "duplex": "FULL",
-                            "max_data_rate": {"value": 10000000000.0, "unit": "bps"},
-                        }
-                    ]
-                },
-                "state": {
-                    "operational": True,
-                    "communication_terminals": [],
-                    "position": {
-                        "frame": {"type": "NamedFrame", "name": "ECEF"},
-                        "x": {"value": 6371000.0, "unit": "m"},
-                        "y": {"value": 0.0, "unit": "m"},
-                        "z": {"value": 0.0, "unit": "m"},
+                "electromagnetic_environment": {
+                    "background_noise": {
+                        "value": -100.0,
+                        "unit": "dBm",
                     },
-                    "velocity": {
-                        "vx": {"value": 0.0, "unit": "m/s"},
-                        "vy": {"value": 7500.0, "unit": "m/s"},
-                        "vz": {"value": 0.0, "unit": "m/s"},
+                    "interference_regions": [],
+                },
+            },
+            "network": {
+                "nodes": [
+                    {
+                        "node_id": "sat-01",
+                        "node_type": "SATELLITE",
+                        "enabled": True,
+                        "capabilities": {
+                            "communication_terminals": [
+                                {
+                                    "terminal_id": "term-laser-01",
+                                    "terminal_type": "LASER",
+                                    "enabled": True,
+                                    "duplex": "FULL",
+                                    "max_data_rate": {"value": 10000000000.0, "unit": "bps"},
+                                }
+                            ]
+                        },
+                        "state": {
+                            "operational": True,
+                            "communication_terminals": [],
+                            "position": {
+                                "frame": {"type": "NamedFrame", "name": "ECEF"},
+                                "x": {"value": 6371000.0, "unit": "m"},
+                                "y": {"value": 0.0, "unit": "m"},
+                                "z": {"value": 0.0, "unit": "m"},
+                            },
+                            "velocity": {
+                                "vx": {"value": 0.0, "unit": "m/s"},
+                                "vy": {"value": 7500.0, "unit": "m/s"},
+                                "vz": {"value": 0.0, "unit": "m/s"},
+                            },
+                        },
+                    }
+                ],
+                "l2_network": {
+                    "links": [],
+                },
+                "l3_network": {
+                    "interfaces": [],
+                    "logical_links": [],
+                    "forwarding_entries": [],
+                },
+                "traffic_resource": {
+                    "demands": [],
+                    "flows": [],
+                    "allocations": [],
+                },
+                "tasks": [],
+                "network_intent": {
+                    "connectivity": {
+                        "enabled": True,
+                        "preserve_global_connectivity": True,
+                    },
+                    "task_assurance": {
+                        "enabled": True,
+                        "priority_aware": True,
+                        "preemption_allowed": False,
+                        "respect_task_qos": True,
+                    },
+                    "resource_efficiency": {
+                        "enabled": True,
+                        "avoid_congestion": True,
+                        "load_balance": True,
                     },
                 },
-            }
-        ],
-        "l2_network": {
-            "links": [],
-        },
-        "l3_network": {
-            "interfaces": [],
-            "logical_links": [],
-            "forwarding_entries": [],
-        },
-        "traffic_resource": {
-            "demands": [],
-            "flows": [],
-            "allocations": [],
-        },
-        "tasks": [],
-        "network_intent": {
-            "connectivity": {
-                "enabled": True,
-                "preserve_global_connectivity": True,
-            },
-            "task_assurance": {
-                "enabled": True,
-                "priority_aware": True,
-                "preemption_allowed": False,
-                "respect_task_qos": True,
-            },
-            "resource_efficiency": {
-                "enabled": True,
-                "avoid_congestion": True,
-                "load_balance": True,
+                "events": [],
+                "external_actions": [],
             },
         },
-        "events": [],
-        "external_actions": [],
     }
 
     state = NetworkWorldState.model_validate(state_dict)
     assert state.world_id == "world-test-01"
     assert state.snapshot_id == "snap-12345"
-    assert state.schema_.version == "0.1.0"
+    assert state.schema_.version == "0.2.0"
     assert state.scenario_time.value == 100.0
-    assert len(state.nodes) == 1
-    assert state.nodes[0].node_id == "sat-01"
-    assert state.nodes[0].node_type == NodeType.SATELLITE
+    assert len(state.state.network.nodes) == 1
+    assert state.state.network.nodes[0].node_id == "sat-01"
+    assert state.state.network.nodes[0].node_type == NodeType.SATELLITE
 
     # JSON roundtrip
     json_str = state.model_dump_json(by_alias=True)
     reconstructed = NetworkWorldState.model_validate_json(json_str)
     assert reconstructed.snapshot_id == state.snapshot_id
-    assert reconstructed.nodes[0].node_id == "sat-01"
+    assert reconstructed.state.network.nodes[0].node_id == "sat-01"
 
 
 # --------------------------------------------------------------------------- #
@@ -321,7 +325,7 @@ def test_vec3_and_quaternion_are_length_checked():
 
 def test_additive_observability_fields_round_trip():
     state_dict = {
-        "schema": {"name": "network-world-state", "version": "0.1.0"},
+        "schema": {"name": "network-world-state", "version": "0.2.0"},
         "world_id": "world-p1",
         "snapshot_id": "snapshot-p1",
         "scenario_time": {"value": 12.5, "unit": "s"},
@@ -332,101 +336,103 @@ def test_additive_observability_fields_round_trip():
         },
         "availability": {"state": "observed", "coverage_ratio": 1.0},
         "provenance": {"source_system": "generic-gse", "adapter_version": "generic_gse_v1@1"},
-        "physical_world": {
-            "environment_type": "SPACE",
-            "spatial_environment": {
-                "default_reference_frame": {"type": "NamedFrame", "name": "ecef"},
-            },
-            "electromagnetic_environment": {
-                "background_noise": {
-                    "value": -100.0,
-                    "unit": "dBm",
+        "state": {
+            "physical_world": {
+                "environment_type": "SPACE",
+                "spatial_environment": {
+                    "default_reference_frame": {"type": "NamedFrame", "name": "ecef"},
                 },
-                "interference_regions": [],
+                "electromagnetic_environment": {
+                    "background_noise": {
+                        "value": -100.0,
+                        "unit": "dBm",
+                    },
+                    "interference_regions": [],
+                },
             },
-        },
-        "nodes": [
-            {
-                "node_id": "sat-01",
-                "node_type": "SATELLITE",
-                "enabled": True,
-                "capabilities": {"communication_terminals": []},
-                "state": {
-                    "operational": True,
-                    "communication_terminals": [],
-                    "position": {
-                        "frame": {"type": "NamedFrame", "name": "ECEF"},
-                        "x": {"value": 6371000.0, "unit": "m"},
-                        "y": {"value": 0.0, "unit": "m"},
-                        "z": {"value": 0.0, "unit": "m"},
+            "network": {
+                "nodes": [
+                    {
+                        "node_id": "sat-01",
+                        "node_type": "SATELLITE",
+                        "enabled": True,
+                        "capabilities": {"communication_terminals": []},
+                        "state": {
+                            "operational": True,
+                            "communication_terminals": [],
+                            "position": {
+                                "frame": {"type": "NamedFrame", "name": "ECEF"},
+                                "x": {"value": 6371000.0, "unit": "m"},
+                                "y": {"value": 0.0, "unit": "m"},
+                                "z": {"value": 0.0, "unit": "m"},
+                            },
+                            "velocity": {
+                                "vx": {"value": 0.0, "unit": "m/s"},
+                                "vy": {"value": 7500.0, "unit": "m/s"},
+                                "vz": {"value": 0.0, "unit": "m/s"},
+                            },
+                            "stamp": {
+                                "source_system": "generic-gse",
+                                "observed_at_instant": {"value": "2026-01-01T00:00:00", "scale": "TAI"},
+                                "sampling": "Exact",
+                            },
+                        },
+                    }
+                ],
+                "l2_network": {
+                    "links": [
+                        {
+                            "link_id": "l1",
+                            "enabled": True,
+                            "endpoint_a": {"node_id": "sat-01", "terminal_id": "t1"},
+                            "endpoint_b": {"node_id": "sat-02", "terminal_id": "t2"},
+                            "link_class": "ISL",
+                            "medium": "LASER",
+                            "status": "UP",
+                            "capacity": {"value": 1e9, "unit": "bps"},
+                            "available_bandwidth": {"value": 1e9, "unit": "bps"},
+                            "utilization": 0.0,
+                            "propagation_delay": {"value": 0.005, "unit": "s"},
+                            "jitter": {"value": 0.0001, "unit": "s"},
+                            "packet_loss_rate": 0.0,
+                            "availability": {"state": "unavailable", "reason": "queue_metrics_not_streamed"},
+                        }
+                    ]
+                },
+                "l3_network": {"interfaces": [], "logical_links": [], "forwarding_entries": []},
+                "traffic_resource": {"demands": [], "flows": [], "allocations": []},
+                "tasks": [],
+                "network_intent": {
+                    "connectivity": {"enabled": True, "preserve_global_connectivity": True},
+                    "task_assurance": {
+                        "enabled": True,
+                        "priority_aware": True,
+                        "preemption_allowed": False,
+                        "respect_task_qos": True,
                     },
-                    "velocity": {
-                        "vx": {"value": 0.0, "unit": "m/s"},
-                        "vy": {"value": 7500.0, "unit": "m/s"},
-                        "vz": {"value": 0.0, "unit": "m/s"},
-                    },
-                    "stamp": {
-                        "source_system": "generic-gse",
-                        "observed_at_instant": {"value": "2026-01-01T00:00:00", "scale": "TAI"},
-                        "sampling": "Exact",
+                    "resource_efficiency": {
+                        "enabled": True,
+                        "avoid_congestion": True,
+                        "load_balance": True,
                     },
                 },
-            }
-        ],
-        "l2_network": {
-            "links": [
-                {
-                    "link_id": "l1",
-                    "enabled": True,
-                    "endpoint_a": {"node_id": "sat-01", "terminal_id": "t1"},
-                    "endpoint_b": {"node_id": "sat-02", "terminal_id": "t2"},
-                    "link_class": "ISL",
-                    "medium": "LASER",
-                    "max_capacity": {"value": 1e9, "unit": "bps"},
-                    "operational": True,
-                    "status": "UP",
-                    "capacity": {"value": 1e9, "unit": "bps"},
-                    "available_bandwidth": {"value": 1e9, "unit": "bps"},
-                    "utilization": 0.0,
-                    "propagation_delay": {"value": 0.005, "unit": "s"},
-                    "jitter": {"value": 0.0001, "unit": "s"},
-                    "packet_loss_rate": 0.0,
-                    "availability": {"state": "unavailable", "reason": "queue_metrics_not_streamed"},
-                }
-            ]
-        },
-        "l3_network": {"interfaces": [], "logical_links": [], "forwarding_entries": []},
-        "traffic_resource": {"demands": [], "flows": [], "allocations": []},
-        "tasks": [],
-        "network_intent": {
-            "connectivity": {"enabled": True, "preserve_global_connectivity": True},
-            "task_assurance": {
-                "enabled": True,
-                "priority_aware": True,
-                "preemption_allowed": False,
-                "respect_task_qos": True,
-            },
-            "resource_efficiency": {
-                "enabled": True,
-                "avoid_congestion": True,
-                "load_balance": True,
+                "events": [],
+                "external_actions": [],
             },
         },
-        "events": [],
-        "external_actions": [],
     }
 
     state = NetworkWorldState.model_validate(state_dict)
     assert state.time_base.scenario_epoch.scale.value == "UTC"
     assert state.availability.state.value == "observed"
     assert state.provenance.adapter_version == "generic_gse_v1@1"
-    assert state.nodes[0].state.stamp.sampling.value == "Exact"
-    assert state.l2_network.links[0].availability.reason == "queue_metrics_not_streamed"
+    assert state.state.network.nodes[0].state.stamp.sampling.value == "Exact"
+    assert state.state.network.l2_network.links[0].availability.reason == "queue_metrics_not_streamed"
 
     reconstructed = NetworkWorldState.model_validate_json(state.model_dump_json(by_alias=True))
     assert reconstructed.time_base.tick_s == pytest.approx(0.1)
-    assert reconstructed.nodes[0].state.stamp.source_system == "generic-gse"
-    assert reconstructed.l2_network.links[0].availability.state.value == "unavailable"
+    assert reconstructed.state.network.nodes[0].state.stamp.source_system == "generic-gse"
+    assert reconstructed.state.network.l2_network.links[0].availability.state.value == "unavailable"
 
 
 def test_every_contract_schema_is_exported_from_the_package():
@@ -488,8 +494,6 @@ def test_b2_angular_velocity_and_link_throughput():
         "endpoint_b": {"node_id": "sat-02", "terminal_id": "term-02"},
         "link_class": "ISL",
         "medium": "LASER",
-        "max_capacity": {"value": 10e9, "unit": "bps"},
-        "operational": True,
         "status": "UP",
         "capacity": {"value": 10e9, "unit": "bps"},
         "available_bandwidth": {"value": 8e9, "unit": "bps"},
@@ -523,3 +527,84 @@ def test_b2_tri_state_requirement_satisfaction():
     reconstructed = RequirementSatisfactionState.model_validate_json(data)
     assert reconstructed.reliability_satisfied == SatisfactionState.SatisfactionStateInProgress
     assert reconstructed.throughput_satisfied == SatisfactionState.SatisfactionStateViolated
+
+
+def test_b1_envelope_and_state_separation():
+    from network_world_model_api import NetworkState, WorldState
+
+    # Verify NetworkWorldState model fields: root envelope has state, no delta_time
+    field_names = set(NetworkWorldState.model_fields.keys())
+    assert "state" in field_names
+    assert "delta_time" not in field_names
+    assert "nodes" not in field_names
+    assert "l2_network" not in field_names
+    assert "physical_world" not in field_names
+
+    # WorldState fields
+    ws_fields = set(WorldState.model_fields.keys())
+    assert "network" in ws_fields
+    assert "physical_world" in ws_fields
+
+    # NetworkState fields
+    ns_fields = set(NetworkState.model_fields.keys())
+    for expected in [
+        "nodes",
+        "l2_network",
+        "l3_network",
+        "traffic_resource",
+        "tasks",
+        "network_intent",
+        "events",
+        "external_actions",
+        "derived_metrics",
+    ]:
+        assert expected in ns_fields
+
+
+def test_b6_unobservable_fields_removed():
+    from network_world_model_api import (
+        ComputeCapability,
+        ForwardingEntry,
+        L2Link,
+        L3Interface,
+        L3LogicalLink,
+        L3Path,
+        NetworkDerivedMetrics,
+        NodeCapabilities,
+        NodeState,
+    )
+
+    # ComputeCapability: no cpu_architecture or gpu_*
+    cc_fields = set(ComputeCapability.model_fields.keys())
+    assert "cpu_architecture" not in cc_fields
+    assert "gpu_count" not in cc_fields
+    assert "gpu_model" not in cc_fields
+    assert "gpu_compute_capacity" not in cc_fields
+
+    # NodeState: no health_score or gpu_utilization
+    ns_fields = set(NodeState.model_fields.keys())
+    assert "health_score" not in ns_fields
+    assert "gpu_utilization" not in ns_fields
+
+    # NodeCapabilities: no payloads
+    nc_fields = set(NodeCapabilities.model_fields.keys())
+    assert "payloads" not in nc_fields
+
+    # L2Link: no max_capacity, operational, or queue
+    l2_fields = set(L2Link.model_fields.keys())
+    assert "max_capacity" not in l2_fields
+    assert "operational" not in l2_fields
+    assert "queue" not in l2_fields
+
+    # L3Interface, L3LogicalLink, ForwardingEntry, L3Path: no network_context; L3Interface no mtu
+    assert "mtu" not in set(L3Interface.model_fields.keys())
+    assert "network_context" not in set(L3Interface.model_fields.keys())
+    assert "network_context" not in set(L3LogicalLink.model_fields.keys())
+    assert "network_context" not in set(ForwardingEntry.model_fields.keys())
+    assert "network_context" not in set(L3Path.model_fields.keys())
+
+    # NetworkDerivedMetrics has reachability and paths
+    ndm_fields = set(NetworkDerivedMetrics.model_fields.keys())
+    assert "reachability" in ndm_fields
+    assert "paths" in ndm_fields
+

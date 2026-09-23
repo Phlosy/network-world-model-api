@@ -1134,9 +1134,6 @@ type CommunicationTerminalState struct {
 
 // ComputeCapability 节点的静态或慢变化计算能力。
 type ComputeCapability struct {
-	// CpuArchitecture CPU 架构，例如 x86_64、aarch64。
-	CpuArchitecture *string `json:"cpu_architecture,omitempty"`
-
 	// CpuComputeCapacity CPU 理论计算能力。
 	CpuComputeCapacity *struct {
 		// Unit 物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。
@@ -1148,21 +1145,6 @@ type ComputeCapability struct {
 
 	// CpuCores CPU 逻辑/物理核心数，具体口径由数据源约定。
 	CpuCores *int `json:"cpu_cores,omitempty"`
-
-	// GpuComputeCapacity GPU 理论计算能力。
-	GpuComputeCapacity *struct {
-		// Unit 物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。
-		Unit string `json:"unit"`
-
-		// Value 数值。为空表示该指标当前未采集、不可用或不适用于当前对象。
-		Value *float32 `json:"value"`
-	} `json:"gpu_compute_capacity,omitempty"`
-
-	// GpuCount GPU 数量。
-	GpuCount *int `json:"gpu_count,omitempty"`
-
-	// GpuModel GPU 型号。
-	GpuModel *string `json:"gpu_model,omitempty"`
 
 	// MemoryCapacity 内存总容量。
 	MemoryCapacity *struct {
@@ -1395,8 +1377,7 @@ type ForwardingEntry struct {
 	Destination Destination `json:"destination"`
 
 	// ForwardingId Forwarding Entry 唯一 ID。
-	ForwardingId   string `json:"forwarding_id"`
-	NetworkContext string `json:"network_context"`
+	ForwardingId string `json:"forwarding_id"`
 
 	// NextHops 有效下一跳集合。
 	NextHops []NextHop `json:"next_hops"`
@@ -1534,20 +1515,8 @@ type L2Link struct {
 	// LinkId L2 Link 全局唯一标识。
 	LinkId string `json:"link_id"`
 
-	// MaxCapacity 链路静态/理论最大容量。
-	MaxCapacity struct {
-		// Unit 物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。
-		Unit string `json:"unit"`
-
-		// Value 数值。为空表示该指标当前未采集、不可用或不适用于当前对象。
-		Value float32 `json:"value"`
-	} `json:"max_capacity"`
-
 	// Medium 实际通信媒介。
 	Medium L2LinkMedium `json:"medium"`
-
-	// Operational 链路当前是否可工作。
-	Operational bool `json:"operational"`
 
 	// PacketLossRate 包丢失率，0~1。
 	PacketLossRate float32 `json:"packet_loss_rate"`
@@ -1560,9 +1529,6 @@ type L2Link struct {
 		// Value 数值。为空表示该指标当前未采集、不可用或不适用于当前对象。
 		Value float32 `json:"value"`
 	} `json:"propagation_delay"`
-
-	// Queue 链路或接口上的队列状态。第一阶段可只采集可获得的聚合队列指标。
-	Queue *QueueState `json:"queue,omitempty"`
 
 	// Stamp 一次观测的溯源与有效窗口，是异步/部分观测对齐的基础。observed_at_instant 与 observed_at_scenario_time 至少提供一个：前者是源系统报告的绝对时刻，后者是已对齐到世界模型时间轴的时刻（该条约束由跨字段校验执行）。valid_from/valid_until 是半开区间 [valid_from, valid_until)，省略 valid_until 表示开区间。重新观测到一个未变化的值不构成状态变化。
 	Stamp *ObservationStamp `json:"stamp,omitempty"`
@@ -1622,18 +1588,6 @@ type L3Interface struct {
 	// L3InterfaceId L3 接口全局唯一 ID。
 	L3InterfaceId string `json:"l3_interface_id"`
 
-	// Mtu 接口 MTU。
-	Mtu struct {
-		// Unit 物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。
-		Unit string `json:"unit"`
-
-		// Value 数值。为空表示该指标当前未采集、不可用或不适用于当前对象。
-		Value float32 `json:"value"`
-	} `json:"mtu"`
-
-	// NetworkContext 逻辑网络上下文，例如 default、VRF/租户/Overlay 标识。
-	NetworkContext string `json:"network_context"`
-
 	// NodeId 所属节点 ID。
 	NodeId string `json:"node_id"`
 
@@ -1656,8 +1610,7 @@ type L3LogicalLink struct {
 	EndpointB L3LogicalEndpoint `json:"endpoint_b"`
 
 	// LogicalLinkId 三层逻辑链路唯一 ID。
-	LogicalLinkId  string `json:"logical_link_id"`
-	NetworkContext string `json:"network_context"`
+	LogicalLinkId string `json:"logical_link_id"`
 
 	// Operational 逻辑链路当前是否有效。
 	Operational bool `json:"operational"`
@@ -1680,8 +1633,6 @@ type L3Network struct {
 	ForwardingEntries []ForwardingEntry       `json:"forwarding_entries"`
 	Interfaces        []L3Interface           `json:"interfaces"`
 	LogicalLinks      []L3LogicalLink         `json:"logical_links"`
-	Paths             *[]L3Path               `json:"paths,omitempty"`
-	Reachability      *[]ReachabilityEntry    `json:"reachability,omitempty"`
 }
 
 // L3Path 根据 Forwarding State 派生得到的端到端路径。
@@ -1691,12 +1642,11 @@ type L3Path struct {
 	LogicalLinks    []string      `json:"logical_links"`
 
 	// Metrics 由 Path 与底层 Link/Traffic 状态推导出的端到端路径指标。
-	Metrics        PathMetrics `json:"metrics"`
-	NetworkContext string      `json:"network_context"`
-	Nodes          []string    `json:"nodes"`
-	PathId         string      `json:"path_id"`
-	SourceNode     string      `json:"source_node"`
-	Valid          bool        `json:"valid"`
+	Metrics    PathMetrics `json:"metrics"`
+	Nodes      []string    `json:"nodes"`
+	PathId     string      `json:"path_id"`
+	SourceNode string      `json:"source_node"`
+	Valid      bool        `json:"valid"`
 }
 
 // L3PathDerived defines model for L3Path.Derived.
@@ -1729,7 +1679,13 @@ type NetworkDerivedMetrics struct {
 	CongestedLinkCount     *int     `json:"congested_link_count,omitempty"`
 	MaximumLinkUtilization *float32 `json:"maximum_link_utilization,omitempty"`
 	PacketLossRate         *float32 `json:"packet_loss_rate,omitempty"`
-	ReachablePairRatio     *float32 `json:"reachable_pair_ratio,omitempty"`
+
+	// Paths 由转发状态推导得到的端到端路径集合（派生状态）。
+	Paths *[]L3Path `json:"paths,omitempty"`
+
+	// Reachability 由转发状态推导得到的端到端可达性集合（派生状态）。
+	Reachability       *[]ReachabilityEntry `json:"reachability,omitempty"`
+	ReachablePairRatio *float32             `json:"reachable_pair_ratio,omitempty"`
 }
 
 // NetworkIntent 网络系统当前的高层目标和任务保障倾向。它不描述具体控制协议，而作为内部 Network Dynamics 的条件。
@@ -1767,22 +1723,13 @@ type NetworkIntent struct {
 	} `json:"task_assurance"`
 }
 
-// NetworkWorldState Network World State v0.1 的顶层快照对象。它表示某一个唯一 scenario_time 下，物理环境、节点、L2、L3、流量/资源、任务和网络意图的完整状态。
-type NetworkWorldState struct {
-	// Availability 某一个量或某一个实体的可观测性。这是本契约的一等语义：不可观测不得用 0、默认值或缺失字段表示，否则世界模型会把「没有观测」训练成真实值（例如把未采集的 CPU 利用率学成 0）。对应外部系统的 coverage / partial / unknown 语义；partial 既不代表失败，也不代表缺失值为 0。
-	Availability *Availability `json:"availability,omitempty"`
-
-	// DeltaTime 场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。
-	DeltaTime *ScenarioTime `json:"delta_time,omitempty"`
-
+// NetworkState 内生通信网络完整拓扑、资源、业务、事件与动作的高频运行状态。
+type NetworkState struct {
 	// DerivedMetrics 所有可由底层状态派生的聚合指标。
 	DerivedMetrics *DerivedMetrics `json:"derived_metrics,omitempty"`
 
 	// Events 与当前快照相关、在该时间窗口内发生的 Event。
 	Events []WorldEvent `json:"events"`
-
-	// Extensions 顶层扩展字段。
-	Extensions *map[string]interface{} `json:"extensions,omitempty"`
 
 	// ExternalActions 与当前快照相关、在该时间窗口内发生的外部主动 Action。
 	ExternalActions []ExternalAction `json:"external_actions"`
@@ -1794,11 +1741,19 @@ type NetworkWorldState struct {
 	L3Network L3Network `json:"l3_network"`
 
 	// NetworkIntent 网络系统当前的高层目标和任务保障倾向。它不描述具体控制协议，而作为内部 Network Dynamics 的条件。
-	NetworkIntent NetworkIntent `json:"network_intent"`
-	Nodes         []Node        `json:"nodes"`
+	NetworkIntent   NetworkIntent   `json:"network_intent"`
+	Nodes           []Node          `json:"nodes"`
+	Tasks           []Task          `json:"tasks"`
+	TrafficResource TrafficResource `json:"traffic_resource"`
+}
 
-	// PhysicalWorld 节点之外客观存在的物理环境。用于描述空间、地理、大气、电磁、干扰及传播环境。节点的位置、速度、姿态等属于 Node State。
-	PhysicalWorld PhysicalWorld `json:"physical_world"`
+// NetworkWorldState Network World State 顶层快照信封对象。承载全局元数据、时间基准、数据血缘与可观测性，封装内部的世界状态本体。
+type NetworkWorldState struct {
+	// Availability 某一个量或某一个实体的可观测性。这是本契约的一等语义：不可观测不得用 0、默认值或缺失字段表示，否则世界模型会把「没有观测」训练成真实值（例如把未采集的 CPU 利用率学成 0）。对应外部系统的 coverage / partial / unknown 语义；partial 既不代表失败，也不代表缺失值为 0。
+	Availability *Availability `json:"availability,omitempty"`
+
+	// Extensions 顶层扩展字段。
+	Extensions *map[string]interface{} `json:"extensions,omitempty"`
 
 	// Provenance 该快照的数据来源。数据血缘必须能从快照本身读出，不能依赖外部记录；否则异步数据源的对齐结果无法审计，数据集也无法精确复现。
 	Provenance *Provenance `json:"provenance,omitempty"`
@@ -1811,11 +1766,12 @@ type NetworkWorldState struct {
 
 	// SnapshotId 当前 World Snapshot 唯一标识。
 	SnapshotId string `json:"snapshot_id"`
-	Tasks      []Task `json:"tasks"`
+
+	// State 网络与物理世界的动态状态本体容器，与外部信封元数据解耦。
+	State WorldState `json:"state"`
 
 	// TimeBase 把世界模型的内部时间轴（scenario_time，相对秒）锚定到外部系统的绝对时刻。该绑定在一个场景内唯一且不变，否则 ObservationStamp 中的 Instant 无法与scenario_time 互相换算。缺少该绑定的快照不能声称自己能独立解释观测时刻。
-	TimeBase        *TimeBase       `json:"time_base,omitempty"`
-	TrafficResource TrafficResource `json:"traffic_resource"`
+	TimeBase *TimeBase `json:"time_base,omitempty"`
 
 	// WorldId 场景/世界唯一标识。
 	WorldId string `json:"world_id"`
@@ -1884,7 +1840,6 @@ type NodeCapabilities struct {
 
 	// Extensions 节点特有能力扩展。
 	Extensions *map[string]interface{} `json:"extensions,omitempty"`
-	Payloads   *[]PayloadCapability    `json:"payloads,omitempty"`
 
 	// StorageCapacity 节点本地存储总容量。
 	StorageCapacity *struct {
@@ -1913,12 +1868,6 @@ type NodeState struct {
 
 	// Faults 当前生效的故障/异常标识。
 	Faults *[]string `json:"faults,omitempty"`
-
-	// GpuUtilization GPU 利用率，统一使用 0~1。
-	GpuUtilization *float32 `json:"gpu_utilization,omitempty"`
-
-	// HealthScore 可选健康度，0 表示完全不可用，1 表示完全健康。
-	HealthScore *float32 `json:"health_score,omitempty"`
 
 	// MemoryUtilization 内存利用率，统一使用 0~1。
 	MemoryUtilization *float32 `json:"memory_utilization,omitempty"`
@@ -2035,18 +1984,6 @@ type PathMetrics struct {
 		// Value 数值。为空表示该指标当前未采集、不可用或不适用于当前对象。
 		Value float32 `json:"value"`
 	} `json:"total_delay"`
-}
-
-// PayloadCapability 节点搭载的任务载荷或功能载荷，例如雷达、相机、传感器或专用处理载荷。
-type PayloadCapability struct {
-	// Capabilities 载荷特有能力参数。
-	Capabilities *map[string]interface{} `json:"capabilities,omitempty"`
-
-	// PayloadId 载荷在节点内的唯一标识。
-	PayloadId string `json:"payload_id"`
-
-	// PayloadType 载荷类型。该字段保持开放，便于适配不同仿真系统。
-	PayloadType string `json:"payload_type"`
 }
 
 // PhysicalWorld 节点之外客观存在的物理环境。用于描述空间、地理、大气、电磁、干扰及传播环境。节点的位置、速度、姿态等属于 Node State。
@@ -2205,30 +2142,6 @@ type Provenance struct {
 
 // QuaternionXYZW 单位四元数 [x, y, z, w]（标量在最后），vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 QuaternionXYZW，语义保持一致。 表示从字段名所指 source frame 到 target frame 的主动旋转；分量顺序固定为 XYZW，禁止使用 wxyz 顺序。
 type QuaternionXYZW = []float64
-
-// QueueState 链路或接口上的队列状态。第一阶段可只采集可获得的聚合队列指标。
-type QueueState struct {
-	// QueueCapacity 队列容量。
-	QueueCapacity *struct {
-		// Unit 物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。
-		Unit string `json:"unit"`
-
-		// Value 数值。为空表示该指标当前未采集、不可用或不适用于当前对象。
-		Value *float32 `json:"value"`
-	} `json:"queue_capacity,omitempty"`
-
-	// QueueDepth 当前排队数据量。
-	QueueDepth *struct {
-		// Unit 物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。
-		Unit string `json:"unit"`
-
-		// Value 数值。为空表示该指标当前未采集、不可用或不适用于当前对象。
-		Value *float32 `json:"value"`
-	} `json:"queue_depth,omitempty"`
-
-	// Utilization 队列利用率，0~1。
-	Utilization *float32 `json:"utilization,omitempty"`
-}
 
 // ReachabilityEntry 从一个源节点到一个 L3 目的对象的可达性。通常可以作为 Derived State。
 type ReachabilityEntry struct {
@@ -2715,6 +2628,15 @@ type WorldEvent struct {
 
 // WorldEventEventType 事件类型。
 type WorldEventEventType string
+
+// WorldState 网络与物理世界的动态状态本体容器，与外部信封元数据解耦。
+type WorldState struct {
+	// Network 内生通信网络完整拓扑、资源、业务、事件与动作的高频运行状态。
+	Network NetworkState `json:"network"`
+
+	// PhysicalWorld 节点之外客观存在的物理环境。用于描述空间、地理、大气、电磁、干扰及传播环境。节点的位置、速度、姿态等属于 Node State。
+	PhysicalWorld *PhysicalWorld `json:"physical_world,omitempty"`
+}
 
 // Getter for additional properties for Constraint. Returns the specified
 // element and whether it was found
