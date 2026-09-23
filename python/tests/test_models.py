@@ -3,10 +3,17 @@ from pydantic import ValidationError
 
 from network_world_model_api import (
     CommunicationTerminalCapability,
+    FrameRef,
+    L2Link,
+    NamedFrameRef,
     NetworkWorldState,
     Node,
+    NodeBodyFrameRef,
+    NodeState,
     NodeType,
     Position,
+    RequirementSatisfactionState,
+    SatisfactionState,
     ScenarioTime,
     SchemaMetadata,
     Velocity,
@@ -30,13 +37,22 @@ def test_node_enum_validation():
 
 def test_submodels():
     pos = Position(
-        frame="ECEF",
+        frame=NamedFrameRef(type="NamedFrame", name="ECEF"),
         x={"value": 6371000.0, "unit": "m"},
         y={"value": 0.0, "unit": "m"},
         z={"value": 0.0, "unit": "m"},
     )
-    assert pos.frame == "ECEF"
+    assert pos.frame.root.name == "ECEF"
     assert pos.x.value == 6371000.0
+
+    # Bare string must be rejected
+    with pytest.raises(ValidationError):
+        Position(
+            frame="ECEF",
+            x={"value": 6371000.0, "unit": "m"},
+            y={"value": 0.0, "unit": "m"},
+            z={"value": 0.0, "unit": "m"},
+        )
 
 
 def test_network_world_state_minimal_valid():
@@ -54,7 +70,7 @@ def test_network_world_state_minimal_valid():
         "physical_world": {
             "environment_type": "SPACE",
             "spatial_environment": {
-                "default_reference_frame": "ECEF",
+                "default_reference_frame": {"type": "NamedFrame", "name": "ECEF"},
             },
             "electromagnetic_environment": {
                 "background_noise": {
@@ -84,7 +100,7 @@ def test_network_world_state_minimal_valid():
                     "operational": True,
                     "communication_terminals": [],
                     "position": {
-                        "frame": "ECEF",
+                        "frame": {"type": "NamedFrame", "name": "ECEF"},
                         "x": {"value": 6371000.0, "unit": "m"},
                         "y": {"value": 0.0, "unit": "m"},
                         "z": {"value": 0.0, "unit": "m"},
@@ -318,7 +334,16 @@ def test_additive_observability_fields_round_trip():
         "provenance": {"source_system": "generic-gse", "adapter_version": "generic_gse_v1@1"},
         "physical_world": {
             "environment_type": "SPACE",
-            "spatial_environment": {"default_reference_frame": "ecef"},
+            "spatial_environment": {
+                "default_reference_frame": {"type": "NamedFrame", "name": "ecef"},
+            },
+            "electromagnetic_environment": {
+                "background_noise": {
+                    "value": -100.0,
+                    "unit": "dBm",
+                },
+                "interference_regions": [],
+            },
         },
         "nodes": [
             {
@@ -330,7 +355,7 @@ def test_additive_observability_fields_round_trip():
                     "operational": True,
                     "communication_terminals": [],
                     "position": {
-                        "frame": "ECEF",
+                        "frame": {"type": "NamedFrame", "name": "ECEF"},
                         "x": {"value": 6371000.0, "unit": "m"},
                         "y": {"value": 0.0, "unit": "m"},
                         "z": {"value": 0.0, "unit": "m"},
@@ -424,3 +449,77 @@ def test_every_contract_schema_is_exported_from_the_package():
 
     unexported = sorted(schema_names - set(network_world_model_api.__all__))
     assert unexported == [], f"contract schemas not listed in __all__: {unexported}"
+
+
+def test_b2_angular_velocity_and_link_throughput():
+    pos = Position(
+        frame=NamedFrameRef(type="NamedFrame", name="ECEF"),
+        x={"value": 6371000.0, "unit": "m"},
+        y={"value": 0.0, "unit": "m"},
+        z={"value": 0.0, "unit": "m"},
+    )
+    vel = Velocity(
+        vx={"value": 0.0, "unit": "m/s"},
+        vy={"value": 7500.0, "unit": "m/s"},
+        vz={"value": 0.0, "unit": "m/s"},
+    )
+    node_state = NodeState(
+        operational=True,
+        communication_terminals=[],
+        position=pos,
+        velocity=vel,
+        angular_velocity_body_rad_s=[0.01, 0.02, 0.03],
+    )
+    assert node_state.angular_velocity_body_rad_s.root == [0.01, 0.02, 0.03]
+
+    with pytest.raises(ValidationError):
+        NodeState(
+            operational=True,
+            communication_terminals=[],
+            position=pos,
+            velocity=vel,
+            angular_velocity_body_rad_s=[0.01, 0.02],
+        )
+
+    link_data = {
+        "link_id": "link-isl-01",
+        "enabled": True,
+        "endpoint_a": {"node_id": "sat-01", "terminal_id": "term-01"},
+        "endpoint_b": {"node_id": "sat-02", "terminal_id": "term-02"},
+        "link_class": "ISL",
+        "medium": "LASER",
+        "max_capacity": {"value": 10e9, "unit": "bps"},
+        "operational": True,
+        "status": "UP",
+        "capacity": {"value": 10e9, "unit": "bps"},
+        "available_bandwidth": {"value": 8e9, "unit": "bps"},
+        "utilization": 0.2,
+        "propagation_delay": {"value": 0.01, "unit": "s"},
+        "jitter": {"value": 0.001, "unit": "s"},
+        "packet_loss_rate": 0.0,
+        "throughput_bps": 2e9,
+    }
+    link = L2Link.model_validate(link_data)
+    assert link.throughput_bps == 2e9
+
+    invalid_link_data = dict(link_data, throughput_bps=-1.0)
+    with pytest.raises(ValidationError):
+        L2Link.model_validate(invalid_link_data)
+
+
+def test_b2_tri_state_requirement_satisfaction():
+    sat = RequirementSatisfactionState(
+        overall_satisfied=SatisfactionState.SatisfactionStateSatisfied,
+        latency_satisfied=SatisfactionState.SatisfactionStateSatisfied,
+        reliability_satisfied=SatisfactionState.SatisfactionStateInProgress,
+        throughput_satisfied=SatisfactionState.SatisfactionStateViolated,
+        deadline_satisfied=SatisfactionState.SatisfactionStateUnknown,
+    )
+    assert sat.overall_satisfied == SatisfactionState.SatisfactionStateSatisfied
+    assert sat.reliability_satisfied.value == "IN_PROGRESS"
+    assert sat.throughput_satisfied.value == "VIOLATED"
+
+    data = sat.model_dump_json()
+    reconstructed = RequirementSatisfactionState.model_validate_json(data)
+    assert reconstructed.reliability_satisfied == SatisfactionState.SatisfactionStateInProgress
+    assert reconstructed.throughput_satisfied == SatisfactionState.SatisfactionStateViolated

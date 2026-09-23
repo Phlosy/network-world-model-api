@@ -62,9 +62,7 @@
         "description": "节点在当前 scenario_time 下的位置状态。位置属于 Node State，而不是 Physical World。",
         "properties": {
           "frame": {
-            "type": "string",
-            "description": "坐标参考系，例如 ECEF、ECI、WGS84 或项目自定义参考系。",
-            "example": "ECEF"
+            "$ref": "#/components/schemas/FrameRef"
           },
           "x": {
             "type": "object",
@@ -297,9 +295,7 @@
             "description": "空间/地理参考环境。",
             "properties": {
               "default_reference_frame": {
-                "type": "string",
-                "description": "场景默认坐标参考系；节点可覆盖并显式声明自己的 frame。",
-                "example": "ECEF"
+                "$ref": "#/components/schemas/FrameRef"
               },
               "earth_model": {
                 "type": "string",
@@ -915,6 +911,10 @@
             "description": "当前指向信息；具体坐标表达由数据源决定。",
             "additionalProperties": true
           },
+          "angular_velocity_body_rad_s": {
+            "$ref": "#/components/schemas/Vec3",
+            "description": "通信终端/天线云台相对节点机体系的角速度 [wx, wy, wz] (rad/s)。"
+          },
           "current_frequency": {
             "type": "object",
             "nullable": true,
@@ -979,6 +979,10 @@
           },
           "orientation": {
             "$ref": "#/components/schemas/Orientation"
+          },
+          "angular_velocity_body_rad_s": {
+            "$ref": "#/components/schemas/Vec3",
+            "description": "节点绕机体系三轴的角速度 [wx, wy, wz] (rad/s)。姿态演化预测必需。"
           },
           "operational": {
             "type": "boolean",
@@ -1277,6 +1281,11 @@
               "unit"
             ],
             "additionalProperties": false
+          },
+          "throughput_bps": {
+            "type": "number",
+            "minimum": 0,
+            "description": "链路当前实际传输吞吐量 (bit/s)。与 capacity 配合用于计算利用率与评估拥塞。"
           },
           "available_bandwidth": {
             "type": "object",
@@ -2733,27 +2742,8 @@
             "description": "预计任务完成的场景绝对时间，而不是剩余时长。"
           },
           "requirement_satisfaction": {
-            "type": "object",
-            "description": "当前任务关键要求是否被满足；unknown 可用 null 表示。",
-            "properties": {
-              "latency_satisfied": {
-                "type": "boolean",
-                "nullable": true
-              },
-              "reliability_satisfied": {
-                "type": "boolean",
-                "nullable": true
-              },
-              "throughput_satisfied": {
-                "type": "boolean",
-                "nullable": true
-              },
-              "deadline_satisfied": {
-                "type": "boolean",
-                "nullable": true
-              }
-            },
-            "additionalProperties": false
+            "$ref": "#/components/schemas/RequirementSatisfactionState",
+            "description": "当前任务关键要求是否被满足。使用三态枚举避免在途任务被误标为未满足（ADR D-0015）。"
           }
         },
         "required": [
@@ -2763,6 +2753,49 @@
           "bytes_sent",
           "bytes_delivered"
         ],
+        "additionalProperties": false
+      },
+      "SatisfactionState": {
+        "type": "string",
+        "enum": [
+          "SATISFIED",
+          "VIOLATED",
+          "IN_PROGRESS",
+          "UNKNOWN"
+        ],
+        "x-enum-varnames": [
+          "SatisfactionStateSatisfied",
+          "SatisfactionStateViolated",
+          "SatisfactionStateInProgress",
+          "SatisfactionStateUnknown"
+        ],
+        "description": "任务保障要求满足状态的三态枚举（SATISFIED=已满足, VIOLATED=明确违背, IN_PROGRESS=在途未决断, UNKNOWN=未声明或未采集）。避免在途任务被误标为未满足导致监督信号污染（ADR D-0015）。"
+      },
+      "RequirementSatisfactionState": {
+        "type": "object",
+        "description": "任务保障要求满足度状态。使用三态枚举（SATISFIED / VIOLATED / IN_PROGRESS / UNKNOWN），防止在途任务被误判为违背。",
+        "properties": {
+          "overall_satisfied": {
+            "$ref": "#/components/schemas/SatisfactionState",
+            "description": "总体要求满足状态。"
+          },
+          "latency_satisfied": {
+            "$ref": "#/components/schemas/SatisfactionState",
+            "description": "时延 SLA 满足状态。"
+          },
+          "reliability_satisfied": {
+            "$ref": "#/components/schemas/SatisfactionState",
+            "description": "可靠性/交付率 SLA 满足状态。"
+          },
+          "throughput_satisfied": {
+            "$ref": "#/components/schemas/SatisfactionState",
+            "description": "吞吐量 SLA 满足状态。"
+          },
+          "deadline_satisfied": {
+            "$ref": "#/components/schemas/SatisfactionState",
+            "description": "截止时间 SLA 满足状态。"
+          }
+        },
         "additionalProperties": false
       },
       "Task": {

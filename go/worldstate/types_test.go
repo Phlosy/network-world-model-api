@@ -20,6 +20,11 @@ func TestEnumValidation(t *testing.T) {
 }
 
 func TestNetworkWorldStateJSONRoundtrip(t *testing.T) {
+	var frame worldstate.FrameRef
+	if err := frame.FromNamedFrameRef(worldstate.NamedFrameRef{Name: "ECEF"}); err != nil {
+		t.Fatalf("failed to create FrameRef: %v", err)
+	}
+
 	timeVal := float32(125.5)
 	state := worldstate.NetworkWorldState{
 		SnapshotId: "snapshot-001",
@@ -49,7 +54,7 @@ func TestNetworkWorldStateJSONRoundtrip(t *testing.T) {
 					Operational:            true,
 					CommunicationTerminals: []worldstate.CommunicationTerminalState{},
 					Position: worldstate.Position{
-						Frame: "ECEF",
+						Frame: frame,
 						X: struct {
 							Unit  string  `json:"unit"`
 							Value float32 `json:"value"`
@@ -294,4 +299,71 @@ func strPtr(v string) *string { return &v }
 
 func samplingPtr(v worldstate.ObservationStampSampling) *worldstate.ObservationStampSampling {
 	return &v
+}
+
+func TestB2AdditionsAndModifications(t *testing.T) {
+	// 1. AngularVelocityBodyRadS and ThroughputBps
+	angVel := worldstate.Vec3{0.01, 0.02, 0.03}
+	throughput := float32(2.5e9)
+	link := worldstate.L2Link{
+		LinkId:        "link-1",
+		Enabled:       true,
+		EndpointA:     worldstate.L2Endpoint{NodeId: "sat-01", TerminalId: "t1"},
+		EndpointB:     worldstate.L2Endpoint{NodeId: "sat-02", TerminalId: "t2"},
+		LinkClass:     worldstate.L2LinkLinkClassISL,
+		Medium:        worldstate.L2LinkMediumLASER,
+		Operational:   true,
+		Status:        worldstate.L2LinkStatusUP,
+		ThroughputBps: &throughput,
+	}
+	if link.ThroughputBps == nil || *link.ThroughputBps != throughput {
+		t.Fatalf("expected throughput %f, got %v", throughput, link.ThroughputBps)
+	}
+
+	nodeState := worldstate.NodeState{
+		Operational:             true,
+		CommunicationTerminals:  []worldstate.CommunicationTerminalState{},
+		AngularVelocityBodyRadS: &angVel,
+	}
+	if nodeState.AngularVelocityBodyRadS == nil || (*nodeState.AngularVelocityBodyRadS)[0] != 0.01 {
+		t.Fatalf("expected angular velocity 0.01, got %v", nodeState.AngularVelocityBodyRadS)
+	}
+
+	// 2. RequirementSatisfactionState & SatisfactionState enum
+	sat := worldstate.SatisfactionStateSatisfied
+	inProg := worldstate.SatisfactionStateInProgress
+	viol := worldstate.SatisfactionStateViolated
+	unknown := worldstate.SatisfactionStateUnknown
+
+	if !sat.Valid() || !inProg.Valid() || !viol.Valid() || !unknown.Valid() {
+		t.Fatal("expected satisfaction state enum values to be valid")
+	}
+
+	reqSat := worldstate.RequirementSatisfactionState{
+		OverallSatisfied:     &sat,
+		LatencySatisfied:     &sat,
+		ReliabilitySatisfied: &inProg,
+		ThroughputSatisfied:  &viol,
+		DeadlineSatisfied:    &unknown,
+	}
+
+	data, err := json.Marshal(reqSat)
+	if err != nil {
+		t.Fatalf("marshal reqSat: %v", err)
+	}
+
+	var decoded worldstate.RequirementSatisfactionState
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("unmarshal reqSat: %v", err)
+	}
+
+	if *decoded.OverallSatisfied != worldstate.SatisfactionStateSatisfied {
+		t.Fatalf("expected SATISFIED, got %v", *decoded.OverallSatisfied)
+	}
+	if *decoded.ReliabilitySatisfied != worldstate.SatisfactionStateInProgress {
+		t.Fatalf("expected IN_PROGRESS, got %v", *decoded.ReliabilitySatisfied)
+	}
+	if *decoded.ThroughputSatisfied != worldstate.SatisfactionStateViolated {
+		t.Fatalf("expected VIOLATED, got %v", *decoded.ThroughputSatisfied)
+	}
 }

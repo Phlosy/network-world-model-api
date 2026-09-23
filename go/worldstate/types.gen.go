@@ -669,6 +669,30 @@ func (e ResourceRefType) Valid() bool {
 	}
 }
 
+// Defines values for SatisfactionState.
+const (
+	SatisfactionStateInProgress SatisfactionState = "IN_PROGRESS"
+	SatisfactionStateSatisfied  SatisfactionState = "SATISFIED"
+	SatisfactionStateUnknown    SatisfactionState = "UNKNOWN"
+	SatisfactionStateViolated   SatisfactionState = "VIOLATED"
+)
+
+// Valid indicates whether the value is a known member of the SatisfactionState enum.
+func (e SatisfactionState) Valid() bool {
+	switch e {
+	case SatisfactionStateInProgress:
+		return true
+	case SatisfactionStateSatisfied:
+		return true
+	case SatisfactionStateUnknown:
+		return true
+	case SatisfactionStateViolated:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ScenarioTimeUnit.
 const (
 	S ScenarioTimeUnit = "s"
@@ -1058,6 +1082,9 @@ type CommunicationTerminalCapabilityTerminalType string
 type CommunicationTerminalState struct {
 	// Active 终端当前是否处于激活/工作状态。
 	Active bool `json:"active"`
+
+	// AngularVelocityBodyRadS 三维向量 [x, y, z]，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Vec3，语义保持一致。 单位由引用它的字段名声明显式声明（例如 _m、_m_s、_rad_s），不得依赖调用方推测。
+	AngularVelocityBodyRadS *Vec3 `json:"angular_velocity_body_rad_s,omitempty"`
 
 	// CurrentFrequency 当前工作频率。
 	CurrentFrequency *struct {
@@ -1543,6 +1570,9 @@ type L2Link struct {
 	// Status 链路当前运行状态。
 	Status L2LinkStatus `json:"status"`
 
+	// ThroughputBps 链路当前实际传输吞吐量 (bit/s)。与 capacity 配合用于计算利用率与评估拥塞。
+	ThroughputBps *float32 `json:"throughput_bps,omitempty"`
+
 	// TransmissionDelay 发送/序列化时延。
 	TransmissionDelay *struct {
 		// Unit 物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。
@@ -1868,6 +1898,9 @@ type NodeCapabilities struct {
 
 // NodeState 节点在当前 scenario_time 下的动态状态。
 type NodeState struct {
+	// AngularVelocityBodyRadS 三维向量 [x, y, z]，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 Vec3，语义保持一致。 单位由引用它的字段名声明显式声明（例如 _m、_m_s、_rad_s），不得依赖调用方推测。
+	AngularVelocityBodyRadS *Vec3 `json:"angular_velocity_body_rad_s,omitempty"`
+
 	// Availability 某一个量或某一个实体的可观测性。这是本契约的一等语义：不可观测不得用 0、默认值或缺失字段表示，否则世界模型会把「没有观测」训练成真实值（例如把未采集的 CPU 利用率学成 0）。对应外部系统的 coverage / partial / unknown 语义；partial 既不代表失败，也不代表缺失值为 0。
 	Availability           *Availability                `json:"availability,omitempty"`
 	CommunicationTerminals []CommunicationTerminalState `json:"communication_terminals"`
@@ -2092,8 +2125,8 @@ type PhysicalWorld struct {
 
 	// SpatialEnvironment 空间/地理参考环境。
 	SpatialEnvironment struct {
-		// DefaultReferenceFrame 场景默认坐标参考系；节点可覆盖并显式声明自己的 frame。
-		DefaultReferenceFrame string `json:"default_reference_frame"`
+		// DefaultReferenceFrame 参考系引用：命名参考系或场景实体机体系，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameRef，语义保持一致。 任何坐标都必须能通过 FrameRef 独立解释；不得从字段名、实体名或调用方类型猜测参考系。
+		DefaultReferenceFrame FrameRef `json:"default_reference_frame"`
 
 		// EarthModel 地球模型或参考椭球，例如 WGS84。
 		EarthModel *string `json:"earth_model,omitempty"`
@@ -2114,8 +2147,8 @@ type PhysicalWorldEnvironmentType string
 
 // Position 节点在当前 scenario_time 下的位置状态。位置属于 Node State，而不是 Physical World。
 type Position struct {
-	// Frame 坐标参考系，例如 ECEF、ECI、WGS84 或项目自定义参考系。
-	Frame string `json:"frame"`
+	// Frame 参考系引用：命名参考系或场景实体机体系，vendored from astra-emu-api Config 契约（来源见 contracts/vendoring.yaml） 的 FrameRef，语义保持一致。 任何坐标都必须能通过 FrameRef 独立解释；不得从字段名、实体名或调用方类型猜测参考系。
+	Frame FrameRef `json:"frame"`
 
 	// X X 轴坐标。
 	X struct {
@@ -2223,6 +2256,24 @@ type ReferenceFrame struct {
 	Transform FrameTransform `json:"transform"`
 }
 
+// RequirementSatisfactionState 任务保障要求满足度状态。使用三态枚举（SATISFIED / VIOLATED / IN_PROGRESS / UNKNOWN），防止在途任务被误判为违背。
+type RequirementSatisfactionState struct {
+	// DeadlineSatisfied 任务保障要求满足状态的三态枚举（SATISFIED=已满足, VIOLATED=明确违背, IN_PROGRESS=在途未决断, UNKNOWN=未声明或未采集）。避免在途任务被误标为未满足导致监督信号污染（ADR D-0015）。
+	DeadlineSatisfied *SatisfactionState `json:"deadline_satisfied,omitempty"`
+
+	// LatencySatisfied 任务保障要求满足状态的三态枚举（SATISFIED=已满足, VIOLATED=明确违背, IN_PROGRESS=在途未决断, UNKNOWN=未声明或未采集）。避免在途任务被误标为未满足导致监督信号污染（ADR D-0015）。
+	LatencySatisfied *SatisfactionState `json:"latency_satisfied,omitempty"`
+
+	// OverallSatisfied 任务保障要求满足状态的三态枚举（SATISFIED=已满足, VIOLATED=明确违背, IN_PROGRESS=在途未决断, UNKNOWN=未声明或未采集）。避免在途任务被误标为未满足导致监督信号污染（ADR D-0015）。
+	OverallSatisfied *SatisfactionState `json:"overall_satisfied,omitempty"`
+
+	// ReliabilitySatisfied 任务保障要求满足状态的三态枚举（SATISFIED=已满足, VIOLATED=明确违背, IN_PROGRESS=在途未决断, UNKNOWN=未声明或未采集）。避免在途任务被误标为未满足导致监督信号污染（ADR D-0015）。
+	ReliabilitySatisfied *SatisfactionState `json:"reliability_satisfied,omitempty"`
+
+	// ThroughputSatisfied 任务保障要求满足状态的三态枚举（SATISFIED=已满足, VIOLATED=明确违背, IN_PROGRESS=在途未决断, UNKNOWN=未声明或未采集）。避免在途任务被误标为未满足导致监督信号污染（ADR D-0015）。
+	ThroughputSatisfied *SatisfactionState `json:"throughput_satisfied,omitempty"`
+}
+
 // ResourceAllocation 显式表示网络资源当前被谁占用多少，用于学习任务保障、抢占和资源倾斜规律。
 type ResourceAllocation struct {
 	AllocationId string `json:"allocation_id"`
@@ -2265,6 +2316,9 @@ type ResourceRef struct {
 
 // ResourceRefType 被分配的资源类型。
 type ResourceRefType string
+
+// SatisfactionState 任务保障要求满足状态的三态枚举（SATISFIED=已满足, VIOLATED=明确违背, IN_PROGRESS=在途未决断, UNKNOWN=未声明或未采集）。避免在途任务被误标为未满足导致监督信号污染（ADR D-0015）。
+type SatisfactionState string
 
 // ScenarioTime 场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。
 type ScenarioTime struct {
@@ -2490,13 +2544,8 @@ type TaskState struct {
 	// Progress 任务完成进度 0~1。
 	Progress float32 `json:"progress"`
 
-	// RequirementSatisfaction 当前任务关键要求是否被满足；unknown 可用 null 表示。
-	RequirementSatisfaction *struct {
-		DeadlineSatisfied    *bool `json:"deadline_satisfied,omitempty"`
-		LatencySatisfied     *bool `json:"latency_satisfied,omitempty"`
-		ReliabilitySatisfied *bool `json:"reliability_satisfied,omitempty"`
-		ThroughputSatisfied  *bool `json:"throughput_satisfied,omitempty"`
-	} `json:"requirement_satisfaction,omitempty"`
+	// RequirementSatisfaction 任务保障要求满足度状态。使用三态枚举（SATISFIED / VIOLATED / IN_PROGRESS / UNKNOWN），防止在途任务被误判为违背。
+	RequirementSatisfaction *RequirementSatisfactionState `json:"requirement_satisfaction,omitempty"`
 
 	// StartedAt 场景内部唯一时间轴。Network World State 中所有动态状态都必须与 scenario_time 对齐。该时间只表达场景时间，不区分现实时间、虚拟时间或仿真时间来源。
 	StartedAt *ScenarioTime `json:"started_at,omitempty"`

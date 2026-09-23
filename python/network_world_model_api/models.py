@@ -84,22 +84,6 @@ class Z(BaseModel):
     )
 
 
-class Position(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    frame: str = Field(
-        ...,
-        description='坐标参考系，例如 ECEF、ECI、WGS84 或项目自定义参考系。',
-        examples=['ECEF'],
-    )
-    x: X = Field(
-        ..., description='X 轴坐标。', examples=[{'value': 6371000, 'unit': 'm'}]
-    )
-    y: Y = Field(..., description='Y 轴坐标。')
-    z: Z = Field(..., description='Z 轴坐标。')
-
-
 class Vx(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -203,22 +187,6 @@ class EnvironmentType(Enum):
     SEA = 'SEA'
     MIXED = 'MIXED'
     GENERIC = 'GENERIC'
-
-
-class SpatialEnvironment(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    default_reference_frame: str = Field(
-        ...,
-        description='场景默认坐标参考系；节点可覆盖并显式声明自己的 frame。',
-        examples=['ECEF'],
-    )
-    earth_model: str | None = Field(
-        None, description='地球模型或参考椭球，例如 WGS84。'
-    )
-    terrain_model_id: str | None = Field(None, description='外部地形模型标识。')
-    obstacle_model_id: str | None = Field(None, description='外部障碍物模型标识。')
 
 
 class Temperature(BaseModel):
@@ -597,27 +565,6 @@ class CurrentPower(BaseModel):
         ...,
         description='物理单位。建议使用约定的标准缩写，例如 s、m、bps、byte、W、dB、dBm、Pa、K。',
     )
-
-
-class CommunicationTerminalState(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    terminal_id: str = Field(
-        ...,
-        description='引用所属节点 capabilities.communication_terminals 中的 terminal_id。',
-    )
-    operational: bool = Field(..., description='终端是否处于可工作状态。')
-    active: bool = Field(..., description='终端当前是否处于激活/工作状态。')
-    tx_rate: TxRate = Field(..., description='当前发送速率。')
-    rx_rate: RxRate = Field(..., description='当前接收速率。')
-    pointing_direction: dict[str, Any] | None = Field(
-        None, description='当前指向信息；具体坐标表达由数据源决定。'
-    )
-    current_frequency: CurrentFrequency | None = Field(
-        None, description='当前工作频率。'
-    )
-    current_power: CurrentPower | None = Field(None, description='当前发射功率。')
 
 
 class NodeType(Enum):
@@ -1316,32 +1263,31 @@ class Status2(Enum):
     CANCELLED = 'CANCELLED'
 
 
-class RequirementSatisfaction(BaseModel):
+class SatisfactionState(Enum):
+    SatisfactionStateSatisfied = 'SATISFIED'
+    SatisfactionStateViolated = 'VIOLATED'
+    SatisfactionStateInProgress = 'IN_PROGRESS'
+    SatisfactionStateUnknown = 'UNKNOWN'
+
+
+class RequirementSatisfactionState(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    latency_satisfied: bool | None = None
-    reliability_satisfied: bool | None = None
-    throughput_satisfied: bool | None = None
-    deadline_satisfied: bool | None = None
-
-
-class TaskState(BaseModel):
-    model_config = ConfigDict(
-        extra='forbid',
+    overall_satisfied: SatisfactionState | None = Field(
+        None, description='总体要求满足状态。'
     )
-    status: Status2 = Field(..., description='任务生命周期状态。')
-    started_at: ScenarioTime | None = None
-    completed_at: ScenarioTime | None = None
-    progress: confloat(ge=0.0, le=1.0) = Field(..., description='任务完成进度 0~1。')
-    bytes_total: BytesTotal = Field(..., description='任务总数据量。')
-    bytes_sent: BytesSent = Field(..., description='源端已发送数据量。')
-    bytes_delivered: BytesDelivered = Field(..., description='目的端已成功交付数据量。')
-    estimated_completion_time: ScenarioTime | None = Field(
-        None, description='预计任务完成的场景绝对时间，而不是剩余时长。'
+    latency_satisfied: SatisfactionState | None = Field(
+        None, description='时延 SLA 满足状态。'
     )
-    requirement_satisfaction: RequirementSatisfaction | None = Field(
-        None, description='当前任务关键要求是否被满足；unknown 可用 null 表示。'
+    reliability_satisfied: SatisfactionState | None = Field(
+        None, description='可靠性/交付率 SLA 满足状态。'
+    )
+    throughput_satisfied: SatisfactionState | None = Field(
+        None, description='吞吐量 SLA 满足状态。'
+    )
+    deadline_satisfied: SatisfactionState | None = Field(
+        None, description='截止时间 SLA 满足状态。'
     )
 
 
@@ -1902,6 +1848,30 @@ class ObservationPositionFormat(
     )
 
 
+class Position(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    frame: FrameRef
+    x: X = Field(
+        ..., description='X 轴坐标。', examples=[{'value': 6371000, 'unit': 'm'}]
+    )
+    y: Y = Field(..., description='Y 轴坐标。')
+    z: Z = Field(..., description='Z 轴坐标。')
+
+
+class SpatialEnvironment(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    default_reference_frame: FrameRef
+    earth_model: str | None = Field(
+        None, description='地球模型或参考椭球，例如 WGS84。'
+    )
+    terrain_model_id: str | None = Field(None, description='外部地形模型标识。')
+    obstacle_model_id: str | None = Field(None, description='外部障碍物模型标识。')
+
+
 class PhysicalWorld(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -1928,6 +1898,31 @@ class PhysicalWorld(BaseModel):
     )
 
 
+class CommunicationTerminalState(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    terminal_id: str = Field(
+        ...,
+        description='引用所属节点 capabilities.communication_terminals 中的 terminal_id。',
+    )
+    operational: bool = Field(..., description='终端是否处于可工作状态。')
+    active: bool = Field(..., description='终端当前是否处于激活/工作状态。')
+    tx_rate: TxRate = Field(..., description='当前发送速率。')
+    rx_rate: RxRate = Field(..., description='当前接收速率。')
+    pointing_direction: dict[str, Any] | None = Field(
+        None, description='当前指向信息；具体坐标表达由数据源决定。'
+    )
+    angular_velocity_body_rad_s: Vec3 | None = Field(
+        None,
+        description='通信终端/天线云台相对节点机体系的角速度 [wx, wy, wz] (rad/s)。',
+    )
+    current_frequency: CurrentFrequency | None = Field(
+        None, description='当前工作频率。'
+    )
+    current_power: CurrentPower | None = Field(None, description='当前发射功率。')
+
+
 class NodeState(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -1935,6 +1930,10 @@ class NodeState(BaseModel):
     position: Position
     velocity: Velocity
     orientation: Orientation | None = None
+    angular_velocity_body_rad_s: Vec3 | None = Field(
+        None,
+        description='节点绕机体系三轴的角速度 [wx, wy, wz] (rad/s)。姿态演化预测必需。',
+    )
     operational: bool = Field(..., description='节点整体是否处于工作状态。')
     health_score: confloat(ge=0.0, le=1.0) | None = Field(
         None, description='可选健康度，0 表示完全不可用，1 表示完全健康。'
@@ -1994,6 +1993,10 @@ class L2Link(BaseModel):
     operational: bool = Field(..., description='链路当前是否可工作。')
     status: Status = Field(..., description='链路当前运行状态。')
     capacity: Capacity = Field(..., description='当前有效容量。')
+    throughput_bps: confloat(ge=0.0) | None = Field(
+        None,
+        description='链路当前实际传输吞吐量 (bit/s)。与 capacity 配合用于计算利用率与评估拥塞。',
+    )
     available_bandwidth: AvailableBandwidth = Field(..., description='当前可用带宽。')
     utilization: confloat(ge=0.0) = Field(
         ...,
@@ -2157,6 +2160,26 @@ class TrafficResource(BaseModel):
     flows: list[Flow]
     allocations: list[ResourceAllocation]
     aggregate_state: TrafficAggregateState | None = None
+
+
+class TaskState(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    status: Status2 = Field(..., description='任务生命周期状态。')
+    started_at: ScenarioTime | None = None
+    completed_at: ScenarioTime | None = None
+    progress: confloat(ge=0.0, le=1.0) = Field(..., description='任务完成进度 0~1。')
+    bytes_total: BytesTotal = Field(..., description='任务总数据量。')
+    bytes_sent: BytesSent = Field(..., description='源端已发送数据量。')
+    bytes_delivered: BytesDelivered = Field(..., description='目的端已成功交付数据量。')
+    estimated_completion_time: ScenarioTime | None = Field(
+        None, description='预计任务完成的场景绝对时间，而不是剩余时长。'
+    )
+    requirement_satisfaction: RequirementSatisfactionState | None = Field(
+        None,
+        description='当前任务关键要求是否被满足。使用三态枚举避免在途任务被误标为未满足（ADR D-0015）。',
+    )
 
 
 class Task(BaseModel):
