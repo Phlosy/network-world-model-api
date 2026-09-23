@@ -79,12 +79,15 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Codegen Tools
+      - name: Install pinned codegen tools
         run: |
-          go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.7.2
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-          python -m pip install --upgrade pip
-          pip install datamodel-code-generator pytest
+          # Version pins live in the Makefile so a local `make generate` and CI
+          # cannot drift apart.  $GITHUB_PATH only affects later steps.
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          make install-codegen-tools
+
+      - name: Check toolchain pins
+        run: make test-tooling-pins
 
       - name: Run make verify
         run: |

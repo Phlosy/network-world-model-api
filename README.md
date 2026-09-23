@@ -104,8 +104,20 @@ print(f"Loaded snapshot {state.snapshot_id} with {len(state.nodes)} nodes")
 ### Prerequisites
 
 - Node.js >= 18 (for Redocly linting)
-- Go >= 1.24 & `oapi-codegen` v2.7.2
-- Python >= 3.10 & `datamodel-code-generator`
+- Go >= 1.24
+- Python >= 3.10
+
+Install the pinned code generators with:
+
+```bash
+make install-codegen-tools
+make test-tooling-pins   # fails if the generators in use drifted from the pins
+```
+
+Version pins live in the [`Makefile`](Makefile) so CI and local runs cannot drift
+apart. They matter because `make verify` only proves anything when the generator
+that produced the committed output is the generator being run. The formatters are
+pinned alongside the generator, since the generated file's layout comes from them.
 
 ### Make Commands
 
